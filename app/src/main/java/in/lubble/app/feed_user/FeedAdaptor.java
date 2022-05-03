@@ -58,8 +58,6 @@ import com.curios.textformatter.FormatText;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.exoplayer2.upstream.DataSpec;
-import com.google.android.exoplayer2.upstream.FileDataSource;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
@@ -402,20 +400,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         LubbleSharedPrefs.getInstance().setFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG();
     }
 
-    private void startShareFlow(Intent sharingIntent) {
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                context, 21,
-                new Intent(context, ShareSheetReceiver.class),
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            context.startActivity(Intent.createChooser(sharingIntent, context.getString(R.string.refer_share_title), pendingIntent.getIntentSender()));
-        } else {
-            context.startActivity(Intent.createChooser(sharingIntent, context.getString(R.string.refer_share_title)));
-        }
-        Analytics.triggerEvent(AnalyticsEvents.POST_SHARED, context);
-    }
-
     private void handleLinkPreview(EnrichedActivity activity, MyViewHolder holder) {
         if (activity.getExtra().containsKey("linkUrl")) {
             String linkUrl = ((String) activity.getExtra().get("linkUrl")).toLowerCase();
@@ -479,6 +463,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         void openGroupFeed(@NotNull FeedGroupData feedGroupData);
 
         void showEmptyView(boolean show);
+
+        void onShareClicked(EnrichedActivity activity, Map<String, Object> extras);
     }
 
     private void initCommentRecyclerView(MyViewHolder holder, EnrichedActivity activity) {
@@ -747,7 +733,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                         break;
 
                     case R.id.cont_share:
-                        FeedUtils.requestPostShareIntent(glide, activity, extras, FeedAdaptor.this::startShareFlow);
+                        feedListener.onShareClicked(activity, extras);
                         break;
 
                     case R.id.cont_link_preview:

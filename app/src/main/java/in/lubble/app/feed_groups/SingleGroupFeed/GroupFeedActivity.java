@@ -1,5 +1,7 @@
 package in.lubble.app.feed_groups.SingleGroupFeed;
 
+import static in.lubble.app.Constants.MEDIA_TYPE;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,6 +23,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.palette.graphics.Palette;
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
@@ -51,8 +54,6 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static in.lubble.app.Constants.MEDIA_TYPE;
 
 public class GroupFeedActivity extends BaseActivity {
 
@@ -160,6 +161,7 @@ public class GroupFeedActivity extends BaseActivity {
     }
 
     void toggleContextMenu(boolean isJoined) {
+        toggleMaterialButtonProgressBar(this, joinInviteBtn, false);
         this.isJoined = isJoined;
         joinInviteBtn.setVisibility(View.VISIBLE);
         String joinText = isJoined ? "Invite" : "Join Group";
@@ -170,12 +172,27 @@ public class GroupFeedActivity extends BaseActivity {
             if (isJoined) {
                 invite();
             } else {
+                toggleMaterialButtonProgressBar(this, joinInviteBtn, true);
                 CloudFlatFeed groupFeed = FeedServices.client.flatFeed("group", feedGroupData.getFeedName());
                 groupFeedFrag.joinGroup(groupFeed);
             }
         });
         if (isJoined)
             invalidateOptionsMenu();
+    }
+
+    private void toggleMaterialButtonProgressBar(Context context, MaterialButton btn, boolean start) {
+        if (start) {
+            btn.setEnabled(false);
+            CircularProgressDrawable circularProgressDrawable = new CircularProgressDrawable(context);
+            circularProgressDrawable.setStyle(CircularProgressDrawable.DEFAULT);
+            circularProgressDrawable.start();
+            btn.setIcon(circularProgressDrawable);
+            btn.setIconPadding(UiUtils.dpToPx(8));
+        } else {
+            joinInviteBtn.setEnabled(true);
+            btn.setIcon(null);
+        }
     }
 
     private void invite() {

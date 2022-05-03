@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="in.lubble.app"
-    android:versionCode="315"
-    android:versionName="3.4-1">
+    android:versionCode="321"
+    android:versionName="3.4.3-2">
 
     <uses-sdk tools:overrideLibrary="com.fxn.pix" />
 
@@ -525,6 +525,8 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDPTz-m602NrCQSXijKXL6v_BOUdJNeOHg" /> <!-- This is for removing Firebase conflict for verification of app links -->
+        <meta-data android:name= "delivery_metrics_exported_to_big_query_enabled"
+            android:value="true"/>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

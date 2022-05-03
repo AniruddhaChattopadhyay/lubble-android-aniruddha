@@ -2,7 +2,6 @@ package in.lubble.app.feed_post;
 
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 
-import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
@@ -25,18 +24,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-import com.google.protobuf.Enum;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
@@ -49,47 +46,40 @@ import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.DateTimeUtils;
 import io.getstream.cloud.CloudClient;
-import io.getstream.core.LookupKind;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.FeedID;
 import io.getstream.core.models.Reaction;
-import io.getstream.core.options.Limit;
 
 public class BigFeedCommentAdaptor extends RecyclerView.Adapter<BigFeedCommentAdaptor.MyViewHolder> {
 
-    private static final int MAX_LIST_COUNT = 2;
-    private Context context;
-    private GlideRequests glide;
-    private List<Reaction> reactionList;
-    private List<Boolean> toogleLikeList;
-    private List<Reaction> newReactionList;
-    private List<Integer> numberOfLikesList;
+    private final Context context;
+    private final GlideRequests glide;
+    private final List<Reaction> reactionList;
+    private final HashMap<String, Integer> likeCountMap = new HashMap<>();
 
     public BigFeedCommentAdaptor(Context context, GlideRequests glide, List<Reaction> reactionList) {
         this.reactionList = reactionList;
         this.context = context;
         this.glide = glide;
-        toogleLikeList = new ArrayList<>(Collections.nCopies(reactionList.size(), false));
-        newReactionList = new ArrayList<>(Collections.nCopies(reactionList.size(), null));
-        numberOfLikesList = new ArrayList<>(Collections.nCopies(reactionList.size(), 0));
     }
 
-
     public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnTouchListener {
-        private EmojiTextView commentTv;
-        private TextView commentTimestampTv, commentUserNameTv;
-        private ImageView commentProfilePicIv;
-        private TextView likeOnCommentTv;
-        private ImageView likeOnCommentIv;
-        private LottieAnimationView likeAnimation;
-        private LinearLayout likeOnCommentLayout;
+        private final EmojiTextView commentTv;
+        private final TextView commentTimestampTv;
+        private final TextView commentUserNameTv;
+        private final ImageView commentProfilePicIv;
+        private final TextView likeOnCommentTv;
+        private final ImageView likeOnCommentIv;
+        private final LottieAnimationView likeAnimation;
+        private final LinearLayout likeOnCommentLayout;
         private View touchView;
-        private RelativeLayout commentSectionLayout;
-        private GestureDetector gestureDetector = new GestureDetector(new GestureDetector.SimpleOnGestureListener(){
+        private final RelativeLayout commentSectionLayout;
+        private final GestureDetector gestureDetector = new GestureDetector(new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
                 return true;
             }
+
             @Override
             public boolean onDoubleTap(MotionEvent e) {
                 toggleLike(likeOnCommentIv, likeAnimation, likeOnCommentTv, getBindingAdapterPosition());
@@ -102,7 +92,7 @@ public class BigFeedCommentAdaptor extends RecyclerView.Adapter<BigFeedCommentAd
                     Toast.makeText(context, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                     return false;
                 }
-                if(touchView.getId() == R.id.cont_like_on_comment)
+                if (touchView.getId() == R.id.cont_like_on_comment)
                     toggleLike(likeOnCommentIv, likeAnimation, likeOnCommentTv, getBindingAdapterPosition());
                 return true;
             }
@@ -112,6 +102,7 @@ public class BigFeedCommentAdaptor extends RecyclerView.Adapter<BigFeedCommentAd
                 return true;
             }
         });
+
         public MyViewHolder(@NonNull View view) {
             super(view);
             commentTv = view.findViewById(R.id.comment_textView);
@@ -132,8 +123,7 @@ public class BigFeedCommentAdaptor extends RecyclerView.Adapter<BigFeedCommentAd
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
             touchView = view;
-            boolean b = gestureDetector.onTouchEvent(motionEvent);
-            return b;
+            return gestureDetector.onTouchEvent(motionEvent);
         }
 
     }
@@ -146,87 +136,83 @@ public class BigFeedCommentAdaptor extends RecyclerView.Adapter<BigFeedCommentAd
         return new BigFeedCommentAdaptor.MyViewHolder(itemView);
     }
 
-    private void displayLikes(int numOfLikes,TextView likeOnCommentTv){
+    private void displayLikes(int numOfLikes, TextView likeOnCommentTv) {
         String text = "";
-        if(numOfLikes==0) {
-            likeOnCommentTv.setText("like");
+        if (numOfLikes == 0) {
+            likeOnCommentTv.setText("Like");
             return;
-        }
-        else if(numOfLikes==1)
-            text = " like";
+        } else if (numOfLikes == 1)
+            text = " Like ";
         else
-            text = " likes";
-
-        likeOnCommentTv.setText(Integer.toString(numOfLikes) + text);
-
-
+            text = " Likes";
+        likeOnCommentTv.setText(numOfLikes + text);
     }
-    private void toggleLike(ImageView likeIv, LottieAnimationView likeAnimation, TextView likeOnCommentTv, int position){
-        Reaction reaction = reactionList.get(position);
-        Map<String,List<Reaction>> reactionOwnChildren= reaction.getOwnChildren();
-        String uid = FirebaseAuth.getInstance().getUid();
-        CloudClient timelineClient = FeedServices.getTimelineClient();
-        assert timelineClient!=null;
-        int numOfLikes = numberOfLikesList.get(position);
-        if(!toogleLikeList.get(position)){
-            likeIv.setVisibility(View.GONE);
-            likeAnimation.setVisibility(View.VISIBLE);
-            likeAnimation.playAnimation();
-            likeAnimation.addAnimatorListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animator) {
 
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animator) {
-
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animator) {
-
-                }
-
-                @Override
-                public void onAnimationRepeat(Animator animator) {
-
-                }
-            });
-            try {
-                String notificationUserFeedId = "notification:" + reaction.getUserID();
-                timelineClient.reactions().addChild(uid,"like", reaction.getId(),
-                        new FeedID(notificationUserFeedId)).whenComplete((reactionHere,throwable)->{
-                    newReactionList.add(position,reactionHere);
-                });
-            } catch (StreamException e) {
-                e.printStackTrace();
-            }
-            numOfLikes++;
-            toogleLikeList.add(position,true);
-        }
-        else{
-            likeAnimation.setVisibility(View.GONE);
-            likeIv.setVisibility(View.VISIBLE);
-            String reactionId = "";
-            if(newReactionList.get(position)!=null)
-                reactionId = newReactionList.get(position).getId();
-            else if(reactionOwnChildren!=null && reactionOwnChildren.containsKey("like"))
-                reactionId = Objects.requireNonNull(reactionOwnChildren.get("like")).get(0).getId();
-            if(!reactionId.equals("")) {
+    private void toggleLike(ImageView likeIv, LottieAnimationView likeAnimation, TextView likeOnCommentTv, int position) {
+        try {
+            Reaction reaction = reactionList.get(position);
+            String uid = FirebaseAuth.getInstance().getUid();
+            CloudClient timelineClient = FeedServices.getTimelineClient();
+            int updatedCount;
+            if (likeIv.getVisibility() == View.VISIBLE) {
+                // like the comment
+                likeIv.setVisibility(View.GONE);
+                likeAnimation.setVisibility(View.VISIBLE);
+                likeAnimation.playAnimation();
+                updatedCount = updateLikeCount(reaction, true);
                 try {
-                    timelineClient.reactions().delete(reactionId);
+                    Reaction childReaction = Reaction.builder()
+                            .id(reaction.getId() + "-like-" + uid)
+                            .kind("like").parent(reaction.getId())
+                            .build();
+                    String notifUserFeedId = "notification:" + reaction.getUserID();
+                    timelineClient.reactions().addChild(uid, reaction.getId(), childReaction, new FeedID(notifUserFeedId));
                 } catch (StreamException e) {
                     e.printStackTrace();
+                    FirebaseCrashlytics.getInstance().recordException(e);
                 }
-                numOfLikes = numOfLikes==0?0:numOfLikes-1;
-                toogleLikeList.add(position,false);
+            } else {
+                //un-like the comment
+                likeAnimation.setVisibility(View.GONE);
+                likeIv.setVisibility(View.VISIBLE);
+                updatedCount = updateLikeCount(reaction, false);
+                try {
+                    timelineClient.reactions().delete(reaction.getId() + "-like-" + uid);
+                } catch (StreamException e) {
+                    e.printStackTrace();
+                    FirebaseCrashlytics.getInstance().recordException(e);
+                }
+            }
+            displayLikes(updatedCount, likeOnCommentTv);
+        } catch (Exception e) {
+            Toast.makeText(context, "Failed! Try again", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+            FirebaseCrashlytics.getInstance().recordException(e);
+        }
+    }
+
+    private int updateLikeCount(Reaction reaction, boolean toIncrement) {
+        Number likeNumber = reaction.getChildrenCounts().get("like");
+        int numOfLikes = 0;
+        if (likeNumber != null)
+            numOfLikes = likeNumber.intValue();
+        Integer cachedLikeCount = likeCountMap.get(reaction.getId());
+        int updatedCount;
+        if (toIncrement) {
+            if (cachedLikeCount != null) {
+                updatedCount = cachedLikeCount + 1;
+            } else {
+                updatedCount = numOfLikes + 1;
+            }
+        } else {
+            if (cachedLikeCount != null) {
+                updatedCount = cachedLikeCount == 0 ? 0 : cachedLikeCount - 1;
+            } else {
+                updatedCount = numOfLikes == 0 ? 0 : numOfLikes - 1;
             }
         }
-
-        displayLikes(numOfLikes,likeOnCommentTv);
-        numberOfLikesList.add(position,numOfLikes);
-
+        likeCountMap.put(reaction.getId(), updatedCount);
+        return updatedCount;
     }
 
     @SuppressLint("SetTextI18n")
@@ -237,24 +223,20 @@ public class BigFeedCommentAdaptor extends RecyclerView.Adapter<BigFeedCommentAd
         if (activityMap != null && activityMap.containsKey("text")) {
             holder.commentTv.setText(activityMap.get("text").toString());
             Object timestamp = reaction.getExtra().get("created_at");
-            Map<String,List<Reaction>> reactionOwnChildren= reaction.getOwnChildren();
-            if(reactionOwnChildren != null) {
+            Map<String, List<Reaction>> reactionOwnChildren = reaction.getOwnChildren();
+            if (reactionOwnChildren != null) {
                 holder.likeAnimation.setVisibility(View.VISIBLE);
                 holder.likeOnCommentIv.setVisibility(View.GONE);
-                toogleLikeList.add(position,true);
+            } else {
+                holder.likeAnimation.setVisibility(View.GONE);
+                holder.likeOnCommentIv.setVisibility(View.VISIBLE);
             }
-            else {
-                toogleLikeList.add(position, false);
-            }
-            if(reaction.getChildrenCounts().containsKey("like")) {
+            if (reaction.getChildrenCounts().containsKey("like")) {
                 int likes = (int) reaction.getChildrenCounts().get("like");
-                numberOfLikesList.add(position,likes);
-                displayLikes(likes,holder.likeOnCommentTv);
+                displayLikes(likes, holder.likeOnCommentTv);
+            } else {
+                displayLikes(0, holder.likeOnCommentTv);
             }
-
-//            holder.likeOnCommentLayout.setOnClickListener(view -> {
-//                toggleLike(holder.likeOnCommentIv,holder.likeAnimation,holder.likeOnCommentTv,position);
-//            });
 
             if (timestamp instanceof String && !TextUtils.isEmpty(String.valueOf(timestamp))) {
                 holder.commentTimestampTv.setText(DateTimeUtils.getHumanTimestamp((String) timestamp));

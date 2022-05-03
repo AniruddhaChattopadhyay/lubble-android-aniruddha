@@ -1,6 +1,5 @@
 package `in`.lubble.app.feed_groups
 
-import `in`.lubble.app.LubbleSharedPrefs
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import io.getstream.cloud.CloudFlatFeed
@@ -15,7 +14,8 @@ import java.io.IOException
 
 class FeedPagingSource(
         private val cloudFlatFeed: CloudFlatFeed,
-        private val limit: Int
+        private val limit: Int,
+        private val rankingAlgo: String? = ""
 ) : PagingSource<Int, EnrichedActivity>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, EnrichedActivity> {
@@ -52,7 +52,7 @@ class FeedPagingSource(
                     EnrichmentFlags()
                             .withReactionCounts()
                             .withOwnReactions()
-                            .withRecentReactions(), "lbl_" + LubbleSharedPrefs.getInstance().lubbleId)
+                            .withRecentReactions(), rankingAlgo)
                     .get()
         }
     }

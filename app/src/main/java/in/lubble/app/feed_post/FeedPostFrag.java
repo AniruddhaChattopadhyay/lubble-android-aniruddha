@@ -2,11 +2,14 @@ package in.lubble.app.feed_post;
 
 import static android.view.View.GONE;
 import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.feed_post.FeedPostFragPermissionsDispatcher.startShareWithPermissionCheck;
 import static in.lubble.app.utils.DateTimeUtils.SERVER_DATE_TIME;
 import static in.lubble.app.utils.DateTimeUtils.stringTimeToEpoch;
 import static in.lubble.app.utils.FeedUtils.getMsgSuffix;
+import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
@@ -106,10 +109,17 @@ import io.getstream.core.options.Filter;
 import io.getstream.core.options.Limit;
 import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 import okhttp3.RequestBody;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+@RuntimePermissions
 public class FeedPostFrag extends Fragment {
 
     private static final String ARG_POST_ID = "LBL_ARG_POST_ID";
@@ -222,140 +232,140 @@ public class FeedPostFrag extends Fragment {
                     ).whenComplete((postList, throwable) -> {
                 if (isAdded() && getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
-                        progressBar.setVisibility(View.GONE);
-                        if (throwable == null) {
-                            if (!postList.isEmpty()) {
-                                EnrichedActivity enrichedActivity = postList.get(0);
-                                Map<String, Object> extras = enrichedActivity.getExtra();
+                        if (isAdded() && getActivity() != null && getContext() != null) {
+                            progressBar.setVisibility(View.GONE);
+                            if (throwable == null) {
+                                if (!postList.isEmpty()) {
+                                    EnrichedActivity enrichedActivity = postList.get(0);
+                                    Map<String, Object> extras = enrichedActivity.getExtra();
 
-                                if (extras != null) {
-                                    if (extras.containsKey("message")) {
-                                        textContentTv.setVisibility(View.VISIBLE);
-                                        textContentTv.setMaxLines(100);
-                                        textContentTv.setText(FormatText.boldAndItalics(String.valueOf(extras.get("message"))));
-                                        textContentTv.setLinkTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
+                                    if (extras != null) {
+                                        if (extras.containsKey("message")) {
+                                            textContentTv.setVisibility(View.VISIBLE);
+                                            textContentTv.setMaxLines(100);
+                                            textContentTv.setText(FormatText.boldAndItalics(String.valueOf(extras.get("message"))));
+                                            textContentTv.setLinkTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
 
-                                        Linkify.addLinks(textContentTv, Linkify.ALL);
+                                            Linkify.addLinks(textContentTv, Linkify.ALL);
 
-                                        BetterLinkMovementMethod betterLinkMovementMethod = BetterLinkMovementMethod.newInstance().setOnLinkClickListener((textView, url) -> {
-                                            Bundle bundle = new Bundle();
-                                            bundle.putString("group_id", String.valueOf(extras.get("group")));
-                                            bundle.putString("post_id", enrichedActivity.getID());
-                                            bundle.putString("author_uid", enrichedActivity.getActor().getID());
-                                            Analytics.triggerEvent(AnalyticsEvents.POST_LINK_CLICKED, bundle, requireContext());
-                                            return false;
-                                        }).setOnLinkLongClickListener((textView, url) -> {
-                                            Bundle bundle = new Bundle();
-                                            bundle.putString("group_id", String.valueOf(extras.get("group")));
-                                            bundle.putString("post_id", enrichedActivity.getID());
-                                            bundle.putString("author_uid", enrichedActivity.getActor().getID());
-                                            Analytics.triggerEvent(AnalyticsEvents.POST_LINK_LONG_CLICKED, bundle, requireContext());
+                                            BetterLinkMovementMethod betterLinkMovementMethod = BetterLinkMovementMethod.newInstance().setOnLinkClickListener((textView, url) -> {
+                                                Bundle bundle = new Bundle();
+                                                bundle.putString("group_id", String.valueOf(extras.get("group")));
+                                                bundle.putString("post_id", enrichedActivity.getID());
+                                                bundle.putString("author_uid", enrichedActivity.getActor().getID());
+                                                Analytics.triggerEvent(AnalyticsEvents.POST_LINK_CLICKED, bundle, requireContext());
+                                                return false;
+                                            }).setOnLinkLongClickListener((textView, url) -> {
+                                                Bundle bundle = new Bundle();
+                                                bundle.putString("group_id", String.valueOf(extras.get("group")));
+                                                bundle.putString("post_id", enrichedActivity.getID());
+                                                bundle.putString("author_uid", enrichedActivity.getActor().getID());
+                                                Analytics.triggerEvent(AnalyticsEvents.POST_LINK_LONG_CLICKED, bundle, requireContext());
 
-                                            ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                                            ClipData clip = ClipData.newPlainText("lubble_feed_copied_url", url);
-                                            clipboard.setPrimaryClip(clip);
-                                            Toast.makeText(requireContext(), "Copied!", Toast.LENGTH_SHORT).show();
-                                            return true;
-                                        });
-                                        textContentTv.setMovementMethod(betterLinkMovementMethod);
+                                                ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                                                ClipData clip = ClipData.newPlainText("lubble_feed_copied_url", url);
+                                                clipboard.setPrimaryClip(clip);
+                                                Toast.makeText(requireContext(), "Copied!", Toast.LENGTH_SHORT).show();
+                                                return true;
+                                            });
+                                            textContentTv.setMovementMethod(betterLinkMovementMethod);
+                                        }
+                                        if (extras.containsKey("photoLink")) {
+                                            mediaLayout.setVisibility(View.VISIBLE);
+                                            photoContentIv.setVisibility(View.VISIBLE);
+                                            String photoLink = extras.get("photoLink").toString();
+                                            Glide.with(requireContext())
+                                                    .load(photoLink)
+                                                    .placeholder(R.color.md_grey_200)
+                                                    .transform(new RoundedCornersTransformation(dpToPx(8), 0))
+                                                    .into(photoContentIv);
+                                            photoContentIv.setOnClickListener(v ->
+                                                    FullScreenImageActivity.open(getActivity(), requireContext(), photoLink, photoContentIv, null, R.drawable.ic_cancel_black_24dp));
+                                        }
+                                        if (extras.containsKey("videoLink")) {
+                                            mediaLayout.setVisibility(View.VISIBLE);
+                                            String vidUrl = extras.get("videoLink").toString();
+                                            exoPlayerView.setVisibility(View.VISIBLE);
+                                            prepareExoPlayerFromFileUri(Uri.parse(vidUrl));
+                                            exoPlayer.setPlayWhenReady(true);
+                                            muteVideo(exoPlayer);
+                                            exoPlayerView.setOnClickListener(v ->
+                                                    FullScreenVideoActivity.open(getActivity(), requireContext(), vidUrl, "", ""));
+                                        }
+
+                                        if (extras.containsKey("authorName")) {
+                                            authorNameTv.setText(extras.get("authorName").toString());
+                                        }
+                                        if (extras.containsKey("group")) {
+                                            groupNameTv.setVisibility(View.VISIBLE);
+                                            groupNameTv.setText(extras.get("group").toString());
+                                        }
+                                        if (extras.containsKey("lubble_id")) {
+                                            lubbleNameTv.setVisibility(View.VISIBLE);
+                                            lubbleNameTv.setText(extras.get("lubble_id").toString());
+                                        }
+                                        if (extras.containsKey("feed_name")) {
+                                            String groupFeedName = extras.get("feed_name").toString();
+                                            groupNameTv.setOnClickListener(v -> {
+                                                FeedGroupData feedGroupData = new FeedGroupData(extras.get("group").toString(), groupFeedName, extras.get("lubble_id").toString());
+                                                GroupFeedActivity.open(requireContext(), feedGroupData);
+                                            });
+                                        }
                                     }
-                                    if (extras.containsKey("photoLink")) {
-                                        mediaLayout.setVisibility(View.VISIBLE);
-                                        photoContentIv.setVisibility(View.VISIBLE);
-                                        String photoLink = extras.get("photoLink").toString();
-                                        Glide.with(requireContext())
-                                                .load(photoLink)
-                                                .placeholder(R.color.md_grey_200)
-                                                .transform(new RoundedCornersTransformation(dpToPx(8), 0))
-                                                .into(photoContentIv);
-                                        photoContentIv.setOnClickListener(v ->
-                                                FullScreenImageActivity.open(getActivity(), requireContext(), photoLink, photoContentIv, null, R.drawable.ic_cancel_black_24dp));
+                                    Map<String, Object> actorMap = enrichedActivity.getActor().getData();
+                                    if (actorMap.containsKey("name")) {
+                                        authorNameTv.setText(String.valueOf(actorMap.get("name")));
+                                        if (actorMap.get("profile_picture") != null) {
+                                            Glide.with(requireContext())
+                                                    .load(actorMap.get("profile_picture").toString())
+                                                    .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                                                    .error(R.drawable.ic_account_circle_black_no_padding)
+                                                    .circleCrop()
+                                                    .into(authorPhotoIv);
+                                        }
                                     }
-                                    if (extras.containsKey("videoLink")) {
-                                        mediaLayout.setVisibility(View.VISIBLE);
-                                        String vidUrl = extras.get("videoLink").toString();
-                                        exoPlayerView.setVisibility(View.VISIBLE);
-                                        prepareExoPlayerFromFileUri(Uri.parse(vidUrl));
-                                        exoPlayer.setPlayWhenReady(true);
-                                        muteVideo(exoPlayer);
-                                        exoPlayerView.setOnClickListener(v ->
-                                                FullScreenVideoActivity.open(getActivity(), requireContext(), vidUrl, "", ""));
+                                    timePostedTv.setText(DateTimeUtils.getHumanTimestampWithTime(enrichedActivity.getTime().getTime()));
+                                    initCommentRecyclerView(enrichedActivity);
+
+                                    List<Reaction> userLikes = enrichedActivity.getOwnReactions().get("like");
+                                    if (userLikes != null && userLikes.size() > 0) {
+                                        likeIv.setImageResource(R.drawable.ic_favorite_24dp);
+                                        likeReactionId = userLikes.get(0).getId();
+                                    } else {
+                                        likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
+                                        likeReactionId = null;
                                     }
 
-                                    if (extras.containsKey("authorName")) {
-                                        authorNameTv.setText(extras.get("authorName").toString());
-                                    }
-                                    if (extras.containsKey("group")) {
-                                        groupNameTv.setVisibility(View.VISIBLE);
-                                        groupNameTv.setText(extras.get("group").toString());
-                                    }
-                                    if (extras.containsKey("lubble_id")) {
-                                        lubbleNameTv.setVisibility(View.VISIBLE);
-                                        lubbleNameTv.setText(extras.get("lubble_id").toString());
-                                    }
-                                    if (extras.containsKey("feed_name")) {
-                                        String groupFeedName = extras.get("feed_name").toString();
-                                        groupNameTv.setOnClickListener(v -> {
-                                            FeedGroupData feedGroupData = new FeedGroupData(extras.get("group").toString(), groupFeedName, extras.get("lubble_id").toString());
-                                            GroupFeedActivity.open(requireContext(), feedGroupData);
-                                        });
-                                    }
-                                }
-                                Map<String, Object> actorMap = enrichedActivity.getActor().getData();
-                                if (actorMap.containsKey("name")) {
-                                    authorNameTv.setText(String.valueOf(actorMap.get("name")));
-                                    if (actorMap.get("profile_picture") != null) {
-                                        Glide.with(requireContext())
-                                                .load(actorMap.get("profile_picture").toString())
-                                                .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                                                .error(R.drawable.ic_account_circle_black_no_padding)
-                                                .circleCrop()
-                                                .into(authorPhotoIv);
-                                    }
-                                }
-                                timePostedTv.setText(DateTimeUtils.getHumanTimestampWithTime(enrichedActivity.getTime().getTime()));
-                                initCommentRecyclerView(enrichedActivity);
+                                    sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
 
-                                List<Reaction> userLikes = enrichedActivity.getOwnReactions().get("like");
-                                if (userLikes != null && userLikes.size() > 0) {
-                                    likeIv.setImageResource(R.drawable.ic_favorite_24dp);
-                                    likeReactionId = userLikes.get(0).getId();
+                                    likeLayout.setOnClickListener(v -> toggleLike(enrichedActivity));
+                                    commentLayout.setOnClickListener(v -> {
+                                        replyEt.requestFocus();
+                                        UiUtils.showKeyboard(requireContext(), replyEt);
+                                    });
+                                    authorPhotoIv.setOnClickListener(v -> {
+                                        ProfileActivity.open(requireContext(), enrichedActivity.getActor().getID());
+                                    });
+                                    handleReactionStats(enrichedActivity);
+                                    handleReplyBottomSheet(enrichedActivity);
+                                    handleLinkPreview(enrichedActivity);
+                                    trackPostImpression(enrichedActivity);
+
+                                    shareLayout.setOnClickListener(v -> {
+                                        startShareWithPermissionCheck(FeedPostFrag.this, enrichedActivity, extras);
+                                    });
+
+                                    moreMenuIv.setOnClickListener(v -> {
+                                        openMorePopupMenu(enrichedActivity.getID(), enrichedActivity.getActor(), extras);
+                                    });
                                 } else {
-                                    likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
-                                    likeReactionId = null;
+                                    Toast.makeText(getContext(), "Post not found", Toast.LENGTH_SHORT).show();
+                                    getActivity().finish();
                                 }
-
-                                sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-
-                                likeLayout.setOnClickListener(v -> toggleLike(enrichedActivity));
-                                commentLayout.setOnClickListener(v -> {
-                                    replyEt.requestFocus();
-                                    UiUtils.showKeyboard(requireContext(), replyEt);
-                                });
-                                authorPhotoIv.setOnClickListener(v -> {
-                                    ProfileActivity.open(requireContext(), enrichedActivity.getActor().getID());
-                                });
-                                handleReactionStats(enrichedActivity);
-                                handleReplyBottomSheet(enrichedActivity);
-                                handleLinkPreview(enrichedActivity);
-                                trackPostImpression(enrichedActivity);
-
-                                shareLayout.setOnClickListener(v -> {
-                                    FeedUtils.requestPostShareIntent(GlideApp.with(requireContext()),
-                                            enrichedActivity, extras,
-                                            this::startShareFlow);
-                                });
-
-                                moreMenuIv.setOnClickListener(v -> {
-                                    openMorePopupMenu(enrichedActivity.getID(), enrichedActivity.getActor(), extras);
-                                });
                             } else {
-                                Toast.makeText(getContext(), "Post not found", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "Error: " + throwable.getCause(), Toast.LENGTH_SHORT).show();
                                 getActivity().finish();
                             }
-                        } else {
-                            Toast.makeText(getContext(), "Error: " + throwable.getCause(), Toast.LENGTH_SHORT).show();
-                            getActivity().finish();
                         }
                     });
                 }
@@ -367,12 +377,16 @@ public class FeedPostFrag extends Fragment {
         }
     }
 
-    public void muteVideo(ExoPlayer exoPlayer){
-        if(exoPlayer.getVolume() == 0F) {
+    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    public void startShare(EnrichedActivity enrichedActivity, Map<String, Object> extras) {
+        FeedUtils.requestPostShareIntent(GlideApp.with(requireContext()), enrichedActivity, extras, this::startShareFlow);
+    }
+
+    public void muteVideo(ExoPlayer exoPlayer) {
+        if (exoPlayer.getVolume() == 0F) {
             exoPlayer.setVolume(0.75F);
             muteBtn.setImageResource(R.drawable.ic_mute);
-        }
-        else{
+        } else {
             exoPlayer.setVolume(0F);
             muteBtn.setImageResource(R.drawable.ic_volume_up_black_24dp);
         }
@@ -745,7 +759,7 @@ public class FeedPostFrag extends Fragment {
     private void initCommentRecyclerView(EnrichedActivity activity) {
         try {
             timelineClient.reactions()
-                    .filter(LookupKind.ACTIVITY, activity.getID(), null,new Limit(50), "comment",true)
+                    .filter(LookupKind.ACTIVITY, activity.getID(), null, new Limit(50), "comment", true)
                     .whenComplete((reactions, throwable) -> {
                         if (isAdded() && getActivity() != null) {
                             getActivity().runOnUiThread(() -> {
@@ -863,4 +877,25 @@ public class FeedPostFrag extends Fragment {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // NOTE: delegate the permission handling to generated method
+        FeedPostFragPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
+    }
+
+    @OnShowRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    void showRationaleForCamera(final PermissionRequest request) {
+        showStoragePermRationale(getContext(), request);
+    }
+
+    @OnPermissionDenied(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    void showDeniedForCamera() {
+        Toast.makeText(getContext(), R.string.storage_perm_denied_text, Toast.LENGTH_SHORT).show();
+    }
+
+    @OnNeverAskAgain(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    void showNeverAskForCamera() {
+        Toast.makeText(getContext(), R.string.storage_perm_never_text, Toast.LENGTH_LONG).show();
+    }
 }
