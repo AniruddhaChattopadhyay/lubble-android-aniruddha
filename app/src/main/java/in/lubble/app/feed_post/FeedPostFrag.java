@@ -759,7 +759,7 @@ public class FeedPostFrag extends Fragment {
     private void initCommentRecyclerView(EnrichedActivity activity) {
         try {
             timelineClient.reactions()
-                    .filter(LookupKind.ACTIVITY, activity.getID(), null,new Limit(50), "comment",true)
+                    .filter(LookupKind.ACTIVITY, activity.getID(), null, new Limit(50), "comment", true)
                     .whenComplete((reactions, throwable) -> {
                         if (isAdded() && getActivity() != null) {
                             getActivity().runOnUiThread(() -> {

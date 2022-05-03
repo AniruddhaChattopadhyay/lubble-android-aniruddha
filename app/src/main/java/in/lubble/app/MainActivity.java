@@ -424,7 +424,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         bottomNavigation.getMenu().clear();
 
         String lubbleId = LubbleSharedPrefs.getInstance().getLubbleId();
-        if ("koramangala".equalsIgnoreCase(lubbleId) || "saraswati_vihar".equalsIgnoreCase(lubbleId) || BuildConfig.DEBUG) {
+        if ("koramangala".equalsIgnoreCase(lubbleId) || "saraswati_vihar".equalsIgnoreCase(lubbleId)) {
             // for existing users show chat-first menu
             NavGraph chatsNavGraph = navController.getNavInflater().inflate(R.navigation.nav_graph_chats);
             navController.setGraph(chatsNavGraph);
