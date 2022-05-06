@@ -750,7 +750,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(IS_GAMES_ENABLED, false);
         map.put(IS_MAP_SHOWN, false);
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
-        map.put(IS_CHATS_ENABLED_FOR_KML, true);
+        map.put(IS_CHATS_ENABLED_FOR_KML, false);
         firebaseRemoteConfig.setDefaultsAsync(map);
         if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
             //toolbarRewardsTv.setVisibility(View.VISIBLE);

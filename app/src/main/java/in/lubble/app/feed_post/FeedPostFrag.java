@@ -763,7 +763,7 @@ public class FeedPostFrag extends Fragment {
                     .whenComplete((reactions, throwable) -> {
                         if (isAdded() && getActivity() != null) {
                             getActivity().runOnUiThread(() -> {
-                                if (throwable == null) {
+                                if (throwable == null && isAdded()) {
                                     commentRecyclerView.setVisibility(View.VISIBLE);
                                     noRepliesHelpTextTv.setVisibility(View.GONE);
                                     if (commentRecyclerView.getActualAdapter() != commentRecyclerView.getAdapter()) {
@@ -780,7 +780,7 @@ public class FeedPostFrag extends Fragment {
                                         noRepliesHelpTextTv.setVisibility(View.VISIBLE);
                                     }
                                 } else {
-                                    if (getView() != null) {
+                                    if (getView() != null && throwable != null) {
                                         Snackbar.make(getView(), "Failed to load replies: " + throwable.getCause(), Snackbar.LENGTH_SHORT).show();
                                     }
                                 }
