@@ -49,6 +49,7 @@ public class Constants {
     public static final String MSG_WATERMARK_TEXT = "MSG_WATERMARK_TEXT";
     public static final String WIKI_URL = "WIKI_URL";
     public static final String IS_GAMES_ENABLED = "IS_GAMES_ENABLED";
+    public static final String IS_CHATS_ENABLED_FOR_KML = "IS_CHATS_ENABLED_FOR_KML";
 
     public static final double SVR_LATI = 12.9344758;
     public static final double SVR_LONGI = 77.6192442;

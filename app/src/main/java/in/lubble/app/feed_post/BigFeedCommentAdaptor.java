@@ -139,7 +139,7 @@ public class BigFeedCommentAdaptor extends RecyclerView.Adapter<BigFeedCommentAd
     private void displayLikes(int numOfLikes, TextView likeOnCommentTv) {
         String text = "";
         if (numOfLikes == 0) {
-            likeOnCommentTv.setText("Like");
+            likeOnCommentTv.setText("Double tap to Like");
             return;
         } else if (numOfLikes == 1)
             text = " Like ";

@@ -5,6 +5,7 @@ import static in.lubble.app.Constants.DELIVERY_FEE;
 import static in.lubble.app.Constants.EVENTS_MAINTENANCE_IMG;
 import static in.lubble.app.Constants.EVENTS_MAINTENANCE_TEXT;
 import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
+import static in.lubble.app.Constants.IS_CHATS_ENABLED_FOR_KML;
 import static in.lubble.app.Constants.IS_GAMES_ENABLED;
 import static in.lubble.app.Constants.IS_MAP_SHOWN;
 import static in.lubble.app.Constants.IS_NOTIF_SNOOZE_ON;
@@ -424,7 +425,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         bottomNavigation.getMenu().clear();
 
         String lubbleId = LubbleSharedPrefs.getInstance().getLubbleId();
-        if ("koramangala".equalsIgnoreCase(lubbleId) || "saraswati_vihar".equalsIgnoreCase(lubbleId)) {
+        if (FirebaseRemoteConfig.getInstance().getBoolean(IS_CHATS_ENABLED_FOR_KML) && ("koramangala".equalsIgnoreCase(lubbleId) || "saraswati_vihar".equalsIgnoreCase(lubbleId))) {
             // for existing users show chat-first menu
             NavGraph chatsNavGraph = navController.getNavInflater().inflate(R.navigation.nav_graph_chats);
             navController.setGraph(chatsNavGraph);
@@ -749,6 +750,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(IS_GAMES_ENABLED, false);
         map.put(IS_MAP_SHOWN, false);
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
+        map.put(IS_CHATS_ENABLED_FOR_KML, false);
         firebaseRemoteConfig.setDefaultsAsync(map);
         if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
             //toolbarRewardsTv.setVisibility(View.VISIBLE);
