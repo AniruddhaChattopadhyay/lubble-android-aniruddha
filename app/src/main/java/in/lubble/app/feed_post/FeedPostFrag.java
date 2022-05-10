@@ -1,6 +1,7 @@
 package in.lubble.app.feed_post;
 
 import static android.view.View.GONE;
+import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.feed_post.FeedPostFragPermissionsDispatcher.startShareWithPermissionCheck;
 import static in.lubble.app.utils.DateTimeUtils.SERVER_DATE_TIME;
@@ -10,6 +11,8 @@ import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
@@ -26,7 +29,9 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.util.Linkify;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -44,8 +49,11 @@ import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.fragment.app.Fragment;
+import androidx.paging.LoadState;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
@@ -120,7 +128,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 @RuntimePermissions
-public class FeedPostFrag extends Fragment {
+public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefreshListener , View.OnTouchListener{
 
     private static final String ARG_POST_ID = "LBL_ARG_POST_ID";
     private static final int ACTION_PROMOTE_POST = 572;
@@ -142,6 +150,7 @@ public class FeedPostFrag extends Fragment {
     private ShimmerRecyclerView commentRecyclerView;
     private PlayerView exoPlayerView;
     private ExoPlayer exoPlayer;
+    private SwipeRefreshLayout swipeRefreshLayout;
     @Nullable
     private String likeReactionId = null;
     private final String userId = FirebaseAuth.getInstance().getUid();
@@ -149,6 +158,10 @@ public class FeedPostFrag extends Fragment {
     private RelativeLayout linkPreviewContainer;
     private CloudClient timelineClient;
     private ImageButton muteBtn;
+    private RelativeLayout postContainer;
+    private LottieAnimationView likeAnimation;
+    private GestureDetector gestureDetector;
+    private View touchView;
 
     public static FeedPostFrag newInstance(String postId) {
         FeedPostFrag feedPostFrag = new FeedPostFrag();
@@ -195,7 +208,9 @@ public class FeedPostFrag extends Fragment {
         postId = requireArguments().getString(ARG_POST_ID);
         commentRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         exoPlayerView = view.findViewById(R.id.exo_player_feed_content);
-
+        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_feed);
+        postContainer = view.findViewById(R.id.post_container);
+        likeAnimation = view.findViewById(R.id.anim_feed_like);
         if (postId == null) {
             throw new IllegalArgumentException("Missing ARG_POST_ID for FeedPostFrag");
         }
@@ -215,13 +230,20 @@ public class FeedPostFrag extends Fragment {
             });
         }
 
+        swipeRefreshLayout.setOnRefreshListener(this);
         Analytics.triggerScreenEvent(requireContext(), this.getClass());
+
+        postContainer.setOnTouchListener(this::onTouch);
+        textContentTv.setOnTouchListener(this::onTouch);
+        photoContentIv.setOnTouchListener(this::onTouch);
+        commentRecyclerView.setOnTouchListener(this::onTouch);
         return view;
     }
 
     private void fetchPost() {
         try {
-            progressBar.setVisibility(View.VISIBLE);
+//            progressBar.setVisibility(View.VISIBLE);
+            swipeRefreshLayout.setRefreshing(true);
             commentRecyclerView.showShimmerAdapter();
             timelineClient.flatFeed("timeline", userId)
                     .getEnrichedActivities(
@@ -238,7 +260,33 @@ public class FeedPostFrag extends Fragment {
                                 if (!postList.isEmpty()) {
                                     EnrichedActivity enrichedActivity = postList.get(0);
                                     Map<String, Object> extras = enrichedActivity.getExtra();
+                                    gestureDetector = new GestureDetector(getContext(),new GestureDetector.SimpleOnGestureListener(){
 
+                                        @Override
+                                        public boolean onDown(MotionEvent e) {
+                                            return true;
+                                        }
+
+                                        @Override
+                                        public boolean onSingleTapUp(MotionEvent e) {
+                                            return true;
+                                        }
+
+                                        @Override
+                                        public boolean onDoubleTap(MotionEvent e) {
+                                            toggleLike(enrichedActivity);
+                                            return super.onDoubleTap(e);
+                                        }
+
+                                        @Override
+                                        public boolean onSingleTapConfirmed(MotionEvent e) {
+                                            if(touchView.getId() == R.id.feed_photo_content) {
+                                                String photoLink = extras.get("photoLink").toString();
+                                                FullScreenImageActivity.open(getActivity(), requireContext(), photoLink, photoContentIv, null, R.drawable.ic_cancel_black_24dp);
+                                            }
+                                            return super.onSingleTapConfirmed(e);
+                                        }
+                                    });
                                     if (extras != null) {
                                         if (extras.containsKey("message")) {
                                             textContentTv.setVisibility(View.VISIBLE);
@@ -279,8 +327,6 @@ public class FeedPostFrag extends Fragment {
                                                     .placeholder(R.color.md_grey_200)
                                                     .transform(new RoundedCornersTransformation(dpToPx(8), 0))
                                                     .into(photoContentIv);
-                                            photoContentIv.setOnClickListener(v ->
-                                                    FullScreenImageActivity.open(getActivity(), requireContext(), photoLink, photoContentIv, null, R.drawable.ic_cancel_black_24dp));
                                         }
                                         if (extras.containsKey("videoLink")) {
                                             mediaLayout.setVisibility(View.VISIBLE);
@@ -337,7 +383,6 @@ public class FeedPostFrag extends Fragment {
                                     }
 
                                     sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-
                                     likeLayout.setOnClickListener(v -> toggleLike(enrichedActivity));
                                     commentLayout.setOnClickListener(v -> {
                                         replyEt.requestFocus();
@@ -369,10 +414,12 @@ public class FeedPostFrag extends Fragment {
                         }
                     });
                 }
+                swipeRefreshLayout.setRefreshing(false);
             });
 
         } catch (StreamException e) {
             FirebaseCrashlytics.getInstance().recordException(e);
+            swipeRefreshLayout.setRefreshing(false);
             e.printStackTrace();
         }
     }
@@ -821,7 +868,28 @@ public class FeedPostFrag extends Fragment {
                         FirebaseCrashlytics.getInstance().recordException(throwable);
                     }
                 });
-                likeIv.setImageResource(R.drawable.ic_favorite_24dp);
+                likeAnimation.setVisibility(View.VISIBLE);
+                likeAnimation.playAnimation();
+                likeAnimation.addAnimatorListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animator) {
+                        likeIv.setVisibility(GONE);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animator) {
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animator) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animator) {
+
+                    }
+                });
                 likeReactionId = like.getId();
                 extractReactionCount(enrichedActivity, "like", likeTv, 1);
                 Analytics.triggerFeedEngagement(enrichedActivity.getForeignID(), "like", 5, "timeline:" + userId, FeedPostFrag.class.getSimpleName());
@@ -831,6 +899,7 @@ public class FeedPostFrag extends Fragment {
             }
         } else {
             // unlike
+            likeAnimation.setVisibility(GONE);
             try {
                 timelineClient.reactions().delete(likeReactionId).whenComplete((aVoid, throwable) -> {
                     if (throwable != null) {
@@ -897,5 +966,17 @@ public class FeedPostFrag extends Fragment {
     @OnNeverAskAgain(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     void showNeverAskForCamera() {
         Toast.makeText(getContext(), R.string.storage_perm_never_text, Toast.LENGTH_LONG).show();
+    }
+
+
+    @Override
+    public void onRefresh() {
+        fetchPost();
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        touchView = view;
+        return gestureDetector.onTouchEvent(motionEvent);
     }
 }
