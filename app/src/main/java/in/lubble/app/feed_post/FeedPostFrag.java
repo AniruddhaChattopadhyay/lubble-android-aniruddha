@@ -900,6 +900,7 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
         } else {
             // unlike
             likeAnimation.setVisibility(GONE);
+            likeIv.setVisibility(View.VISIBLE);
             try {
                 timelineClient.reactions().delete(likeReactionId).whenComplete((aVoid, throwable) -> {
                     if (throwable != null) {
