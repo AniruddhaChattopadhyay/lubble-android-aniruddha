@@ -1,7 +1,6 @@
 package in.lubble.app.feed_post;
 
 import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.feed_post.FeedPostFragPermissionsDispatcher.startShareWithPermissionCheck;
@@ -290,7 +289,7 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
                                     });
                                     if (extras != null) {
                                         if (extras.containsKey("message")) {
-                                            textContentTv.setVisibility(VISIBLE);
+                                            textContentTv.setVisibility(View.VISIBLE);
                                             textContentTv.setMaxLines(100);
                                             textContentTv.setText(FormatText.boldAndItalics(String.valueOf(extras.get("message"))));
                                             textContentTv.setLinkTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
@@ -320,8 +319,8 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
                                             textContentTv.setMovementMethod(betterLinkMovementMethod);
                                         }
                                         if (extras.containsKey("photoLink")) {
-                                            mediaLayout.setVisibility(VISIBLE);
-                                            photoContentIv.setVisibility(VISIBLE);
+                                            mediaLayout.setVisibility(View.VISIBLE);
+                                            photoContentIv.setVisibility(View.VISIBLE);
                                             String photoLink = extras.get("photoLink").toString();
                                             Glide.with(requireContext())
                                                     .load(photoLink)
@@ -330,9 +329,9 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
                                                     .into(photoContentIv);
                                         }
                                         if (extras.containsKey("videoLink")) {
-                                            mediaLayout.setVisibility(VISIBLE);
+                                            mediaLayout.setVisibility(View.VISIBLE);
                                             String vidUrl = extras.get("videoLink").toString();
-                                            exoPlayerView.setVisibility(VISIBLE);
+                                            exoPlayerView.setVisibility(View.VISIBLE);
                                             prepareExoPlayerFromFileUri(Uri.parse(vidUrl));
                                             exoPlayer.setPlayWhenReady(true);
                                             muteVideo(exoPlayer);
@@ -344,11 +343,11 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
                                             authorNameTv.setText(extras.get("authorName").toString());
                                         }
                                         if (extras.containsKey("group")) {
-                                            groupNameTv.setVisibility(VISIBLE);
+                                            groupNameTv.setVisibility(View.VISIBLE);
                                             groupNameTv.setText(extras.get("group").toString());
                                         }
                                         if (extras.containsKey("lubble_id")) {
-                                            lubbleNameTv.setVisibility(VISIBLE);
+                                            lubbleNameTv.setVisibility(View.VISIBLE);
                                             lubbleNameTv.setText(extras.get("lubble_id").toString());
                                         }
                                         if (extras.containsKey("feed_name")) {
@@ -702,7 +701,7 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
     private void postComment(String activityId, String foreignId, String postActorUid) {
         try {
             replyIv.setVisibility(View.GONE);
-            replyProgressBar.setVisibility(VISIBLE);
+            replyProgressBar.setVisibility(View.VISIBLE);
             String replyText = replyEt.getText().toString().trim();
             Reaction comment = new Reaction.Builder()
                     .kind("comment")
@@ -718,12 +717,12 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
                         replyProgressBar.setVisibility(View.GONE);
                         if (throwable != null) {
                             Toast.makeText(getContext(), "Reply Failed!", Toast.LENGTH_SHORT).show();
-                            replyIv.setVisibility(VISIBLE);
+                            replyIv.setVisibility(View.VISIBLE);
                             replyProgressBar.setVisibility(View.GONE);
                         } else {
                             replyEt.clearFocus();
                             replyEt.setText("");
-                            replyIv.setVisibility(VISIBLE);
+                            replyIv.setVisibility(View.VISIBLE);
                             LubbleSharedPrefs.getInstance().setReplyBottomSheet(null);
                             fetchPost();
                             sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -736,7 +735,7 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
         } catch (StreamException e) {
             e.printStackTrace();
             Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            replyIv.setVisibility(VISIBLE);
+            replyIv.setVisibility(View.VISIBLE);
             replyProgressBar.setVisibility(View.GONE);
         }
     }
@@ -746,7 +745,7 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
         if (activity.getExtra().containsKey("linkUrl")) {
             String linkUrl = ((String) activity.getExtra().get("linkUrl")).toLowerCase();
             if (!TextUtils.isEmpty(linkUrl)) {
-                linkPreviewContainer.setVisibility(VISIBLE);
+                linkPreviewContainer.setVisibility(View.VISIBLE);
                 if (activity.getExtra().containsKey("linkTitle")) {
                     linkTitleTv.setText((String) activity.getExtra().get("linkTitle"));
                 }
@@ -797,7 +796,7 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
             enrichedActivity.getReactionCounts().put(reaction, reactionCount);
         }
         if (reactionCount > 0) {
-            statsTv.setVisibility(VISIBLE);
+            statsTv.setVisibility(View.VISIBLE);
             statsTv.setText(String.valueOf(reactionCount));
         } else {
             statsTv.setText("");
@@ -812,7 +811,7 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
                         if (isAdded() && getActivity() != null) {
                             getActivity().runOnUiThread(() -> {
                                 if (throwable == null && isAdded()) {
-                                    commentRecyclerView.setVisibility(VISIBLE);
+                                    commentRecyclerView.setVisibility(View.VISIBLE);
                                     noRepliesHelpTextTv.setVisibility(View.GONE);
                                     if (commentRecyclerView.getActualAdapter() != commentRecyclerView.getAdapter()) {
                                         // recycler view is currently holding shimmer adapter so hide it
@@ -825,7 +824,7 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
                                         commentRecyclerView.setAdapter(adapter);
                                     } else {
                                         commentRecyclerView.setVisibility(View.GONE);
-                                        noRepliesHelpTextTv.setVisibility(VISIBLE);
+                                        noRepliesHelpTextTv.setVisibility(View.VISIBLE);
                                     }
                                 } else {
                                     if (getView() != null && throwable != null) {
@@ -869,7 +868,7 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
                         FirebaseCrashlytics.getInstance().recordException(throwable);
                     }
                 });
-                likeAnimation.setVisibility(VISIBLE);
+                likeAnimation.setVisibility(View.VISIBLE);
                 likeAnimation.playAnimation();
                 likeAnimation.addAnimatorListener(new Animator.AnimatorListener() {
                     @Override
@@ -901,7 +900,7 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
         } else {
             // unlike
             likeAnimation.setVisibility(GONE);
-            likeIv.setVisibility(VISIBLE);
+            likeIv.setVisibility(View.VISIBLE);
             try {
                 timelineClient.reactions().delete(likeReactionId).whenComplete((aVoid, throwable) -> {
                     if (throwable != null) {
