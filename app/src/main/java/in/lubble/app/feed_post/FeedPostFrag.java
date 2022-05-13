@@ -1,7 +1,6 @@
 package in.lubble.app.feed_post;
 
 import static android.view.View.GONE;
-import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.feed_post.FeedPostFragPermissionsDispatcher.startShareWithPermissionCheck;
 import static in.lubble.app.utils.DateTimeUtils.SERVER_DATE_TIME;
@@ -12,7 +11,6 @@ import static in.lubble.app.utils.UiUtils.dpToPx;
 
 import android.Manifest;
 import android.animation.Animator;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
@@ -49,7 +47,6 @@ import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.fragment.app.Fragment;
-import androidx.paging.LoadState;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -85,6 +82,7 @@ import java.util.Map;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
+import in.lubble.app.LubbleLinkMovementMethod;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -115,7 +113,6 @@ import io.getstream.core.models.Reaction;
 import io.getstream.core.options.EnrichmentFlags;
 import io.getstream.core.options.Filter;
 import io.getstream.core.options.Limit;
-import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 import okhttp3.RequestBody;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
@@ -128,7 +125,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 @RuntimePermissions
-public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefreshListener , View.OnTouchListener{
+public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefreshListener, View.OnTouchListener {
 
     private static final String ARG_POST_ID = "LBL_ARG_POST_ID";
     private static final int ACTION_PROMOTE_POST = 572;
@@ -136,7 +133,7 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
 
     private String postId;
 
-    private ProgressBar progressBar, replyProgressBar;
+    private ProgressBar replyProgressBar;
     private EmojiTextView textContentTv;
     private RelativeLayout mediaLayout;
     private ImageView photoContentIv;
@@ -177,7 +174,6 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.feed_post_fragment, container, false);
 
-        progressBar = view.findViewById(R.id.progressbar_post);
         textContentTv = view.findViewById(R.id.feed_text_content);
         mediaLayout = view.findViewById(R.id.media_container);
         photoContentIv = view.findViewById(R.id.feed_photo_content);
@@ -234,7 +230,6 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
         Analytics.triggerScreenEvent(requireContext(), this.getClass());
 
         postContainer.setOnTouchListener(this::onTouch);
-        textContentTv.setOnTouchListener(this::onTouch);
         photoContentIv.setOnTouchListener(this::onTouch);
         commentRecyclerView.setOnTouchListener(this::onTouch);
         return view;
@@ -242,7 +237,6 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
 
     private void fetchPost() {
         try {
-//            progressBar.setVisibility(View.VISIBLE);
             swipeRefreshLayout.setRefreshing(true);
             commentRecyclerView.showShimmerAdapter();
             timelineClient.flatFeed("timeline", userId)
@@ -252,176 +246,189 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
                                     .withReactionCounts()
                                     .withOwnReactions()
                     ).whenComplete((postList, throwable) -> {
-                if (isAdded() && getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        if (isAdded() && getActivity() != null && getContext() != null) {
-                            progressBar.setVisibility(View.GONE);
-                            if (throwable == null) {
-                                if (!postList.isEmpty()) {
-                                    EnrichedActivity enrichedActivity = postList.get(0);
-                                    Map<String, Object> extras = enrichedActivity.getExtra();
-                                    gestureDetector = new GestureDetector(getContext(),new GestureDetector.SimpleOnGestureListener(){
+                        if (isAdded() && getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                if (isAdded() && getActivity() != null && getContext() != null) {
+                                    swipeRefreshLayout.setRefreshing(false);
+                                    if (throwable == null) {
+                                        if (!postList.isEmpty()) {
+                                            EnrichedActivity enrichedActivity = postList.get(0);
+                                            Map<String, Object> extras = enrichedActivity.getExtra();
+                                            addGestureDetector(enrichedActivity, extras);
+                                            if (extras != null) {
+                                                if (extras.containsKey("message")) {
+                                                    textContentTv.setVisibility(View.VISIBLE);
+                                                    textContentTv.setMaxLines(100);
+                                                    textContentTv.setText(FormatText.boldAndItalics(String.valueOf(extras.get("message"))));
+                                                    textContentTv.setLinkTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
 
-                                        @Override
-                                        public boolean onDown(MotionEvent e) {
-                                            return true;
-                                        }
+                                                    Linkify.addLinks(textContentTv, Linkify.ALL);
 
-                                        @Override
-                                        public boolean onSingleTapUp(MotionEvent e) {
-                                            return true;
-                                        }
+                                                    LubbleLinkMovementMethod betterLinkMovementMethod = getLinkMovementMethod(enrichedActivity, extras);
+                                                    textContentTv.setMovementMethod(betterLinkMovementMethod);
+                                                }
+                                                if (extras.containsKey("photoLink")) {
+                                                    mediaLayout.setVisibility(View.VISIBLE);
+                                                    photoContentIv.setVisibility(View.VISIBLE);
+                                                    String photoLink = extras.get("photoLink").toString();
+                                                    Glide.with(requireContext())
+                                                            .load(photoLink)
+                                                            .placeholder(R.color.md_grey_200)
+                                                            .transform(new RoundedCornersTransformation(dpToPx(8), 0))
+                                                            .into(photoContentIv);
+                                                }
+                                                if (extras.containsKey("videoLink")) {
+                                                    mediaLayout.setVisibility(View.VISIBLE);
+                                                    String vidUrl = extras.get("videoLink").toString();
+                                                    exoPlayerView.setVisibility(View.VISIBLE);
+                                                    prepareExoPlayerFromFileUri(Uri.parse(vidUrl));
+                                                    exoPlayer.setPlayWhenReady(true);
+                                                    muteVideo(exoPlayer);
+                                                    exoPlayerView.setOnClickListener(v ->
+                                                            FullScreenVideoActivity.open(getActivity(), requireContext(), vidUrl, "", ""));
+                                                }
 
-                                        @Override
-                                        public boolean onDoubleTap(MotionEvent e) {
-                                            toggleLike(enrichedActivity);
-                                            return super.onDoubleTap(e);
-                                        }
-
-                                        @Override
-                                        public boolean onSingleTapConfirmed(MotionEvent e) {
-                                            if(touchView.getId() == R.id.feed_photo_content) {
-                                                String photoLink = extras.get("photoLink").toString();
-                                                FullScreenImageActivity.open(getActivity(), requireContext(), photoLink, photoContentIv, null, R.drawable.ic_cancel_black_24dp);
+                                                if (extras.containsKey("authorName")) {
+                                                    authorNameTv.setText(extras.get("authorName").toString());
+                                                }
+                                                if (extras.containsKey("group")) {
+                                                    groupNameTv.setVisibility(View.VISIBLE);
+                                                    groupNameTv.setText(extras.get("group").toString());
+                                                }
+                                                if (extras.containsKey("lubble_id")) {
+                                                    lubbleNameTv.setVisibility(View.VISIBLE);
+                                                    lubbleNameTv.setText(extras.get("lubble_id").toString());
+                                                }
+                                                if (extras.containsKey("feed_name")) {
+                                                    String groupFeedName = extras.get("feed_name").toString();
+                                                    groupNameTv.setOnClickListener(v -> {
+                                                        FeedGroupData feedGroupData = new FeedGroupData(extras.get("group").toString(), groupFeedName, extras.get("lubble_id").toString());
+                                                        GroupFeedActivity.open(requireContext(), feedGroupData);
+                                                    });
+                                                }
                                             }
-                                            return super.onSingleTapConfirmed(e);
-                                        }
-                                    });
-                                    if (extras != null) {
-                                        if (extras.containsKey("message")) {
-                                            textContentTv.setVisibility(View.VISIBLE);
-                                            textContentTv.setMaxLines(100);
-                                            textContentTv.setText(FormatText.boldAndItalics(String.valueOf(extras.get("message"))));
-                                            textContentTv.setLinkTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
+                                            Map<String, Object> actorMap = enrichedActivity.getActor().getData();
+                                            if (actorMap.containsKey("name")) {
+                                                authorNameTv.setText(String.valueOf(actorMap.get("name")));
+                                                if (actorMap.get("profile_picture") != null) {
+                                                    Glide.with(requireContext())
+                                                            .load(actorMap.get("profile_picture").toString())
+                                                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                                                            .error(R.drawable.ic_account_circle_black_no_padding)
+                                                            .circleCrop()
+                                                            .into(authorPhotoIv);
+                                                }
+                                            }
+                                            timePostedTv.setText(DateTimeUtils.getHumanTimestampWithTime(enrichedActivity.getTime().getTime()));
+                                            initCommentRecyclerView(enrichedActivity);
 
-                                            Linkify.addLinks(textContentTv, Linkify.ALL);
+                                            List<Reaction> userLikes = enrichedActivity.getOwnReactions().get("like");
+                                            if (userLikes != null && userLikes.size() > 0) {
+                                                likeIv.setImageResource(R.drawable.ic_favorite_24dp);
+                                                likeReactionId = userLikes.get(0).getId();
+                                            } else {
+                                                likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
+                                                likeReactionId = null;
+                                            }
 
-                                            BetterLinkMovementMethod betterLinkMovementMethod = BetterLinkMovementMethod.newInstance().setOnLinkClickListener((textView, url) -> {
-                                                Bundle bundle = new Bundle();
-                                                bundle.putString("group_id", String.valueOf(extras.get("group")));
-                                                bundle.putString("post_id", enrichedActivity.getID());
-                                                bundle.putString("author_uid", enrichedActivity.getActor().getID());
-                                                Analytics.triggerEvent(AnalyticsEvents.POST_LINK_CLICKED, bundle, requireContext());
-                                                return false;
-                                            }).setOnLinkLongClickListener((textView, url) -> {
-                                                Bundle bundle = new Bundle();
-                                                bundle.putString("group_id", String.valueOf(extras.get("group")));
-                                                bundle.putString("post_id", enrichedActivity.getID());
-                                                bundle.putString("author_uid", enrichedActivity.getActor().getID());
-                                                Analytics.triggerEvent(AnalyticsEvents.POST_LINK_LONG_CLICKED, bundle, requireContext());
-
-                                                ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                                                ClipData clip = ClipData.newPlainText("lubble_feed_copied_url", url);
-                                                clipboard.setPrimaryClip(clip);
-                                                Toast.makeText(requireContext(), "Copied!", Toast.LENGTH_SHORT).show();
-                                                return true;
+                                            sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                                            likeLayout.setOnClickListener(v -> toggleLike(enrichedActivity));
+                                            commentLayout.setOnClickListener(v -> {
+                                                replyEt.requestFocus();
+                                                UiUtils.showKeyboard(requireContext(), replyEt);
                                             });
-                                            textContentTv.setMovementMethod(betterLinkMovementMethod);
-                                        }
-                                        if (extras.containsKey("photoLink")) {
-                                            mediaLayout.setVisibility(View.VISIBLE);
-                                            photoContentIv.setVisibility(View.VISIBLE);
-                                            String photoLink = extras.get("photoLink").toString();
-                                            Glide.with(requireContext())
-                                                    .load(photoLink)
-                                                    .placeholder(R.color.md_grey_200)
-                                                    .transform(new RoundedCornersTransformation(dpToPx(8), 0))
-                                                    .into(photoContentIv);
-                                        }
-                                        if (extras.containsKey("videoLink")) {
-                                            mediaLayout.setVisibility(View.VISIBLE);
-                                            String vidUrl = extras.get("videoLink").toString();
-                                            exoPlayerView.setVisibility(View.VISIBLE);
-                                            prepareExoPlayerFromFileUri(Uri.parse(vidUrl));
-                                            exoPlayer.setPlayWhenReady(true);
-                                            muteVideo(exoPlayer);
-                                            exoPlayerView.setOnClickListener(v ->
-                                                    FullScreenVideoActivity.open(getActivity(), requireContext(), vidUrl, "", ""));
-                                        }
-
-                                        if (extras.containsKey("authorName")) {
-                                            authorNameTv.setText(extras.get("authorName").toString());
-                                        }
-                                        if (extras.containsKey("group")) {
-                                            groupNameTv.setVisibility(View.VISIBLE);
-                                            groupNameTv.setText(extras.get("group").toString());
-                                        }
-                                        if (extras.containsKey("lubble_id")) {
-                                            lubbleNameTv.setVisibility(View.VISIBLE);
-                                            lubbleNameTv.setText(extras.get("lubble_id").toString());
-                                        }
-                                        if (extras.containsKey("feed_name")) {
-                                            String groupFeedName = extras.get("feed_name").toString();
-                                            groupNameTv.setOnClickListener(v -> {
-                                                FeedGroupData feedGroupData = new FeedGroupData(extras.get("group").toString(), groupFeedName, extras.get("lubble_id").toString());
-                                                GroupFeedActivity.open(requireContext(), feedGroupData);
+                                            authorPhotoIv.setOnClickListener(v -> {
+                                                ProfileActivity.open(requireContext(), enrichedActivity.getActor().getID());
                                             });
-                                        }
-                                    }
-                                    Map<String, Object> actorMap = enrichedActivity.getActor().getData();
-                                    if (actorMap.containsKey("name")) {
-                                        authorNameTv.setText(String.valueOf(actorMap.get("name")));
-                                        if (actorMap.get("profile_picture") != null) {
-                                            Glide.with(requireContext())
-                                                    .load(actorMap.get("profile_picture").toString())
-                                                    .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                                                    .error(R.drawable.ic_account_circle_black_no_padding)
-                                                    .circleCrop()
-                                                    .into(authorPhotoIv);
-                                        }
-                                    }
-                                    timePostedTv.setText(DateTimeUtils.getHumanTimestampWithTime(enrichedActivity.getTime().getTime()));
-                                    initCommentRecyclerView(enrichedActivity);
+                                            handleReactionStats(enrichedActivity);
+                                            handleReplyBottomSheet(enrichedActivity);
+                                            handleLinkPreview(enrichedActivity);
+                                            trackPostImpression(enrichedActivity);
 
-                                    List<Reaction> userLikes = enrichedActivity.getOwnReactions().get("like");
-                                    if (userLikes != null && userLikes.size() > 0) {
-                                        likeIv.setImageResource(R.drawable.ic_favorite_24dp);
-                                        likeReactionId = userLikes.get(0).getId();
+                                            shareLayout.setOnClickListener(v -> {
+                                                startShareWithPermissionCheck(FeedPostFrag.this, enrichedActivity, extras);
+                                            });
+
+                                            moreMenuIv.setOnClickListener(v -> {
+                                                openMorePopupMenu(enrichedActivity.getID(), enrichedActivity.getActor(), extras);
+                                            });
+                                        } else {
+                                            Toast.makeText(getContext(), "Post not found", Toast.LENGTH_SHORT).show();
+                                            getActivity().finish();
+                                        }
                                     } else {
-                                        likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
-                                        likeReactionId = null;
+                                        Toast.makeText(getContext(), "Error: " + throwable.getCause(), Toast.LENGTH_SHORT).show();
+                                        getActivity().finish();
                                     }
-
-                                    sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                                    likeLayout.setOnClickListener(v -> toggleLike(enrichedActivity));
-                                    commentLayout.setOnClickListener(v -> {
-                                        replyEt.requestFocus();
-                                        UiUtils.showKeyboard(requireContext(), replyEt);
-                                    });
-                                    authorPhotoIv.setOnClickListener(v -> {
-                                        ProfileActivity.open(requireContext(), enrichedActivity.getActor().getID());
-                                    });
-                                    handleReactionStats(enrichedActivity);
-                                    handleReplyBottomSheet(enrichedActivity);
-                                    handleLinkPreview(enrichedActivity);
-                                    trackPostImpression(enrichedActivity);
-
-                                    shareLayout.setOnClickListener(v -> {
-                                        startShareWithPermissionCheck(FeedPostFrag.this, enrichedActivity, extras);
-                                    });
-
-                                    moreMenuIv.setOnClickListener(v -> {
-                                        openMorePopupMenu(enrichedActivity.getID(), enrichedActivity.getActor(), extras);
-                                    });
-                                } else {
-                                    Toast.makeText(getContext(), "Post not found", Toast.LENGTH_SHORT).show();
-                                    getActivity().finish();
                                 }
-                            } else {
-                                Toast.makeText(getContext(), "Error: " + throwable.getCause(), Toast.LENGTH_SHORT).show();
-                                getActivity().finish();
-                            }
+                            });
                         }
                     });
-                }
-                swipeRefreshLayout.setRefreshing(false);
-            });
 
         } catch (StreamException e) {
             FirebaseCrashlytics.getInstance().recordException(e);
-            swipeRefreshLayout.setRefreshing(false);
             e.printStackTrace();
+            if (isAdded()) {
+                swipeRefreshLayout.setRefreshing(false);
+            }
         }
+    }
+
+    private LubbleLinkMovementMethod getLinkMovementMethod(EnrichedActivity enrichedActivity, Map<String, Object> extras) {
+        return (LubbleLinkMovementMethod) LubbleLinkMovementMethod.newInstance(requireContext())
+                .setOnLinkDoubleClickListener(() -> {
+                    toggleLike(enrichedActivity);
+                })
+                .setOnLinkClickListener((textView, url) -> {
+                    Bundle bundle = new Bundle();
+                    bundle.putString("group_id", String.valueOf(extras.get("group")));
+                    bundle.putString("post_id", enrichedActivity.getID());
+                    bundle.putString("author_uid", enrichedActivity.getActor().getID());
+                    Analytics.triggerEvent(AnalyticsEvents.POST_LINK_CLICKED, bundle, requireContext());
+                    return false;
+                }).setOnLinkLongClickListener((textView, url) -> {
+                    Bundle bundle = new Bundle();
+                    bundle.putString("group_id", String.valueOf(extras.get("group")));
+                    bundle.putString("post_id", enrichedActivity.getID());
+                    bundle.putString("author_uid", enrichedActivity.getActor().getID());
+                    Analytics.triggerEvent(AnalyticsEvents.POST_LINK_LONG_CLICKED, bundle, requireContext());
+
+                    ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("lubble_feed_copied_url", url);
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(requireContext(), "Copied!", Toast.LENGTH_SHORT).show();
+                    return true;
+                });
+    }
+
+    private void addGestureDetector(EnrichedActivity enrichedActivity, Map<String, Object> extras) {
+        gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
+
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true;
+            }
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                toggleLike(enrichedActivity);
+                return super.onDoubleTap(e);
+            }
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                if (touchView.getId() == R.id.feed_photo_content) {
+                    String photoLink = extras.get("photoLink").toString();
+                    FullScreenImageActivity.open(getActivity(), requireContext(), photoLink, photoContentIv, null, R.drawable.ic_cancel_black_24dp);
+                }
+                return super.onSingleTapConfirmed(e);
+            }
+        });
     }
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -900,6 +907,7 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
         } else {
             // unlike
             likeAnimation.setVisibility(GONE);
+            likeIv.setVisibility(View.VISIBLE);
             try {
                 timelineClient.reactions().delete(likeReactionId).whenComplete((aVoid, throwable) -> {
                     if (throwable != null) {
