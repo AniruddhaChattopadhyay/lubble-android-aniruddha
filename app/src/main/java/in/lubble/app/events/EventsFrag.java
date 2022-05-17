@@ -120,8 +120,7 @@ public class EventsFrag extends Fragment  {
         return locationRequest;
     }
 
-    private void checkLocationSettings(ProgressBar progressBar) {
-        progressBar.setVisibility(View.VISIBLE);
+    private void checkLocationSettings() {
         EventsFrag eventsFrag = this;
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(getLocationRequest());
@@ -166,7 +165,7 @@ public class EventsFrag extends Fragment  {
             maintenanceAnim.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.VISIBLE);
-            checkLocationSettings(progressBar);
+            checkLocationSettings();
         }
     }
 
