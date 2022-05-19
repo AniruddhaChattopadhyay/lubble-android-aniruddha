@@ -260,4 +260,6 @@
         <item quantity="one">reply</item>
         <item quantity="other">replies</item>
     </plurals>
+
+    <string name="loc_perm_rationale_events">We need your location to show events nearest to you</string>
 </resources>

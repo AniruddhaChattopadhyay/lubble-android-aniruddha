@@ -1,10 +1,12 @@
 package in.lubble.app.events;
 
+import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.Constants.EVENTS_MAINTENANCE_IMG;
 import static in.lubble.app.Constants.EVENTS_MAINTENANCE_TEXT;
 import static in.lubble.app.events.EventsFragPermissionsDispatcher.fetchLastKnownLocationWithPermissionCheck;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.location.Location;
@@ -18,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -36,26 +39,29 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import java.util.List;
-import java.util.concurrent.Executor;
 
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
-import in.lubble.app.auth.LocationActivity;
 import in.lubble.app.events.new_event.NewEventActivity;
 import in.lubble.app.models.EventData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.utils.ActivityResultListener;
 import in.lubble.app.utils.UiUtils;
 import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
 import permissions.dispatcher.RuntimePermissions;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 @RuntimePermissions
-public class EventsFrag extends Fragment  {
+public class EventsFrag extends Fragment implements ActivityResultListener {
     private static final String TAG = "EventsFrag";
     private static final int REQUEST_LOCATION_ON = 150;
     private RecyclerView recyclerView;
@@ -65,7 +71,6 @@ public class EventsFrag extends Fragment  {
     private EventsAdapter adapter;
     private ChildEventListener childEventListener;
     private ProgressBar progressBar;
-    private boolean locationServices = true;
 
     public EventsFrag() {
         // Required empty public constructor
@@ -86,6 +91,10 @@ public class EventsFrag extends Fragment  {
         maintenanceAnim = view.findViewById(R.id.anim_maintenance);
         recyclerView = view.findViewById(R.id.rv_events);
         fab = view.findViewById(R.id.fab_new_event);
+
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) requireActivity()).setOnActivResultForFrag(this);
+        }
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new EventsAdapter(getContext());
@@ -109,38 +118,35 @@ public class EventsFrag extends Fragment  {
                 }
             }
         });
-
+        checkLocationSettings();
         return view;
     }
+
     private LocationRequest getLocationRequest() {
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(1000);
-        locationRequest.setWaitForAccurateLocation(true);
+        locationRequest.setNumUpdates(1);
         return locationRequest;
     }
 
     private void checkLocationSettings() {
-        EventsFrag eventsFrag = this;
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(getLocationRequest());
 
         SettingsClient client = LocationServices.getSettingsClient(getActivity());
         Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
 
-        task.addOnSuccessListener( locationSettingsResponse -> {
-            fetchLastKnownLocationWithPermissionCheck(eventsFrag);
-        });
+        task.addOnSuccessListener(locationSettingsResponse -> fetchLastKnownLocationWithPermissionCheck(EventsFrag.this));
 
         task.addOnFailureListener(e -> {
             if (e instanceof ResolvableApiException) {
+                // Location settings are not satisfied, but this can be fixed
+                // by showing the user a dialog.
                 try {
-                    if(locationServices) {
-                        ResolvableApiException resolvable = (ResolvableApiException) e;
-                        startIntentSenderForResult(resolvable.getResolution().getIntentSender(), REQUEST_LOCATION_ON, null, 0, 0, 0, null);
-                    }
-                    else
-                        fetchLastKnownLocationWithPermissionCheck(this);
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    ResolvableApiException resolvable = (ResolvableApiException) e;
+                    resolvable.startResolutionForResult(requireActivity(), REQUEST_LOCATION_ON);
                 } catch (IntentSender.SendIntentException sendEx) {
                     // Ignore the error.
                 }
@@ -165,7 +171,6 @@ public class EventsFrag extends Fragment  {
             maintenanceAnim.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.VISIBLE);
-            checkLocationSettings();
         }
     }
 
@@ -176,15 +181,19 @@ public class EventsFrag extends Fragment  {
                 // Logic to handle location object
                 getEvents(location);
             } else {
-                final Location dummyLoc = new Location("dummy");
-                dummyLoc.setLatitude(LubbleSharedPrefs.getInstance().getCenterLati());
-                dummyLoc.setLongitude(LubbleSharedPrefs.getInstance().getCenterLongi());
-                getEvents(dummyLoc);
+                getEventsWithoutLoc();
             }
         });
         if (getActivity() != null && getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).toggleSearchInToolbar(false);
         }
+    }
+
+    private void getEventsWithoutLoc() {
+        final Location dummyLoc = new Location("dummy");
+        dummyLoc.setLatitude(LubbleSharedPrefs.getInstance().getCenterLati());
+        dummyLoc.setLongitude(LubbleSharedPrefs.getInstance().getCenterLongi());
+        getEvents(dummyLoc);
     }
 
     private void getEvents(Location location) {
@@ -227,19 +236,51 @@ public class EventsFrag extends Fragment  {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onActivityResultForFrag(int requestCode, int resultCode, Intent data) {
+        onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_LOCATION_ON) {
-            if(resultCode==0) {
-                locationServices = false;
+            if (resultCode == RESULT_OK) {
+                fetchLastKnownLocationWithPermissionCheck(EventsFrag.this);
+            } else {
+                final AlertDialog alertDialog = new AlertDialog.Builder(requireContext()).create();
+                alertDialog.setMessage(getString(R.string.loc_perm_rationale_events));
+                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.all_ok), (dialog, which) -> checkLocationSettings());
+                alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.all_cancel), (dialog, which) -> getEventsWithoutLoc());
+                alertDialog.setCancelable(false);
+                alertDialog.show();
             }
-            else
-                locationServices = true;
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // NOTE: delegate the permission handling to generated method
+        EventsFragPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
+    }
+
+    @OnShowRationale(Manifest.permission.ACCESS_FINE_LOCATION)
+    void showRationaleForEventLoc(final PermissionRequest request) {
+        final AlertDialog alertDialog = new AlertDialog.Builder(requireContext()).create();
+        alertDialog.setMessage(getString(R.string.loc_perm_rationale_events));
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.all_ok), (dialog, which) -> request.proceed());
+        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.all_cancel), (dialog, which) -> request.cancel());
+        alertDialog.setCancelable(false);
+        alertDialog.show();
+    }
+
+    @OnPermissionDenied(Manifest.permission.ACCESS_FINE_LOCATION)
+    void showDeniedForEventLoc() {
+        getEventsWithoutLoc();
+    }
+
+    @OnNeverAskAgain(Manifest.permission.ACCESS_FINE_LOCATION)
+    void showNeverAskForEventLoc() {
+        getEventsWithoutLoc();
     }
 }

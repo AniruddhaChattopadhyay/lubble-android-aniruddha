@@ -121,6 +121,7 @@ import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.MainUtils;
+import in.lubble.app.utils.ActivityResultListener;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UiUtils;
 import in.lubble.app.utils.UserUtils;
@@ -162,6 +163,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private ActionMode actionMode;
     private ChatSearchListener chatSearchListener;
     private SwipeRefreshLayout.OnRefreshListener feedRefreshListener;
+    private ActivityResultListener activityResultListener;
     private boolean isSearchVisible;
     private long unreadChatsCount = 0;
 
@@ -1042,6 +1044,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         this.feedRefreshListener = listener;
     }
 
+    public void setOnActivResultForFrag(ActivityResultListener listener) {
+        this.activityResultListener = listener;
+    }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         switch (menuItem.getItemId()) {
@@ -1070,6 +1076,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQ_CODE_JOIN_GROUPS && feedRefreshListener != null) {
             feedRefreshListener.onRefresh();
+        } else if (activityResultListener != null) {
+            activityResultListener.onActivityResultForFrag(requestCode, resultCode, data);
         }
     }
 
