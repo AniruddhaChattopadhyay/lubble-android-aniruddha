@@ -5,7 +5,8 @@ import static in.lubble.app.Constants.EVENTS_MAINTENANCE_TEXT;
 import static in.lubble.app.events.EventsFragPermissionsDispatcher.fetchLastKnownLocationWithPermissionCheck;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.content.IntentSender;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -23,17 +24,25 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.auth.LocationActivity;
 import in.lubble.app.events.new_event.NewEventActivity;
 import in.lubble.app.models.EventData;
 import in.lubble.app.network.Endpoints;
@@ -46,8 +55,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 @RuntimePermissions
-public class EventsFrag extends Fragment {
+public class EventsFrag extends Fragment  {
     private static final String TAG = "EventsFrag";
+    private static final int REQUEST_LOCATION_ON = 150;
     private RecyclerView recyclerView;
     private TextView maintenanceTv;
     private LottieAnimationView maintenanceAnim;
@@ -55,6 +65,7 @@ public class EventsFrag extends Fragment {
     private EventsAdapter adapter;
     private ChildEventListener childEventListener;
     private ProgressBar progressBar;
+    private boolean locationServices = true;
 
     public EventsFrag() {
         // Required empty public constructor
@@ -101,6 +112,41 @@ public class EventsFrag extends Fragment {
 
         return view;
     }
+    private LocationRequest getLocationRequest() {
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(1000);
+        locationRequest.setWaitForAccurateLocation(true);
+        return locationRequest;
+    }
+
+    private void checkLocationSettings() {
+        EventsFrag eventsFrag = this;
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(getLocationRequest());
+
+        SettingsClient client = LocationServices.getSettingsClient(getActivity());
+        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
+
+        task.addOnSuccessListener( locationSettingsResponse -> {
+            fetchLastKnownLocationWithPermissionCheck(eventsFrag);
+        });
+
+        task.addOnFailureListener(e -> {
+            if (e instanceof ResolvableApiException) {
+                try {
+                    if(locationServices) {
+                        ResolvableApiException resolvable = (ResolvableApiException) e;
+                        startIntentSenderForResult(resolvable.getResolution().getIntentSender(), REQUEST_LOCATION_ON, null, 0, 0, 0, null);
+                    }
+                    else
+                        fetchLastKnownLocationWithPermissionCheck(this);
+                } catch (IntentSender.SendIntentException sendEx) {
+                    // Ignore the error.
+                }
+            }
+        });
+    }
 
     @Override
     public void onResume() {
@@ -119,12 +165,10 @@ public class EventsFrag extends Fragment {
             maintenanceAnim.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.VISIBLE);
-
-            fetchLastKnownLocationWithPermissionCheck(this);
+            checkLocationSettings();
         }
     }
 
-    @SuppressLint("MissingPermission")
     @NeedsPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     public void fetchLastKnownLocation() {
         LocationServices.getFusedLocationProviderClient(requireContext()).getLastLocation().addOnSuccessListener(location -> {
@@ -185,5 +229,17 @@ public class EventsFrag extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_LOCATION_ON) {
+            if(resultCode==0) {
+                locationServices = false;
+            }
+            else
+                locationServices = true;
+        }
     }
 }
