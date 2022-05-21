@@ -935,6 +935,8 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
         } else {
             startActivity(Intent.createChooser(sharingIntent, getString(R.string.refer_share_title)));
         }
+        Bundle bundle = new Bundle();
+        bundle.putString("feed_id", sharingIntent.getStringExtra("FEED_POST_ID"));
         Analytics.triggerEvent(AnalyticsEvents.POST_SHARED, requireContext());
     }
 

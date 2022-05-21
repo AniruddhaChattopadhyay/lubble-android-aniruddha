@@ -46,6 +46,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -477,7 +478,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         } else {
             requireContext().startActivity(Intent.createChooser(sharingIntent, requireContext().getString(R.string.refer_share_title)));
         }
-        Analytics.triggerEvent(AnalyticsEvents.POST_SHARED, requireContext());
+        Bundle bundle = new Bundle();
+        bundle.putString("feed_id", sharingIntent.getStringExtra("FEED_POST_ID"));
+        Analytics.triggerEvent(AnalyticsEvents.POST_SHARED, bundle, requireContext());
     }
 
     @Override

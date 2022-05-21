@@ -54,6 +54,7 @@ public class FeedUtils {
             Object actorName = activity.getActor().getData().get("name");
             String suffix = getMsgSuffix(actorName, LubbleSharedPrefs.getInstance().getMsgCopyShareUrl());
             sharingIntent.putExtra(Intent.EXTRA_TEXT, message + suffix);
+            sharingIntent.putExtra("FEED_POST_ID", activity.getID());
             if (extras != null) {
                 Object photoLinkExtra = extras.get("photoLink");
                 if (photoLinkExtra != null && !TextUtils.isEmpty(String.valueOf(photoLinkExtra))) {

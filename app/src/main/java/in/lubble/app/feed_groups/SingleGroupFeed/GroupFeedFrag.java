@@ -437,6 +437,8 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
         } else {
             requireContext().startActivity(Intent.createChooser(sharingIntent, requireContext().getString(R.string.refer_share_title)));
         }
+        Bundle bundle = new Bundle();
+        bundle.putString("feed_id", sharingIntent.getStringExtra("FEED_POST_ID"));
         Analytics.triggerEvent(AnalyticsEvents.POST_SHARED, requireContext());
     }
 
