@@ -302,8 +302,10 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     public void onViewAttachedToWindow(@NonNull @NotNull FeedAdaptor.MyViewHolder holder) {
         super.onViewAttachedToWindow(holder);
         if (holder.exoPlayer != null) {
-            holder.exoPlayer.setPlayWhenReady(true);
-            holder.muteBtn.setOnClickListener(v -> {
+            ExoPlayer exoPlayer = exoplayerMap.get(holder.getBindingAdapterPosition());
+            if (exoPlayer != null) {
+                exoPlayer.setPlayWhenReady(true);
+                holder.muteBtn.setOnClickListener(v -> {
 //                if(holder.exoPlayer.getVolume() == 0F) {
 //                    holder.exoPlayer.setVolume(0.75F);
 //                    holder.muteBtn.setImageResource(R.drawable.ic_volume_up_black_24dp);
@@ -312,8 +314,9 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 //                    holder.exoPlayer.setVolume(0F);
 //                    holder.muteBtn.setImageResource(R.drawable.ic_mute);
 //                }
-                muteVideo(holder.muteBtn, holder.exoPlayer);
-            });
+                    muteVideo(holder.muteBtn, exoPlayer);
+                });
+            }
         }
     }
 
@@ -331,8 +334,11 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     public void onViewDetachedFromWindow(@NonNull @NotNull FeedAdaptor.MyViewHolder holder) {
         super.onViewDetachedFromWindow(holder);
         if (holder.exoPlayer != null) {
-            holder.exoPlayer.setPlayWhenReady(false);
-            holder.exoPlayer.pause();
+            ExoPlayer exoPlayer = exoplayerMap.get(holder.getBindingAdapterPosition());
+            if (exoPlayer != null) {
+                exoPlayer.setPlayWhenReady(false);
+                exoPlayer.pause();
+            }
         }
     }
 
