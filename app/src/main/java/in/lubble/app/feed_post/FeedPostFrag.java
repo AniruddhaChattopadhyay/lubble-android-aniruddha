@@ -1,6 +1,7 @@
 package in.lubble.app.feed_post;
 
 import static android.view.View.GONE;
+import static in.lubble.app.Constants.IS_IMPRESSIONS_COUNT_ENABLED;
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.feed_post.FeedPostFragPermissionsDispatcher.startShareWithPermissionCheck;
 import static in.lubble.app.utils.DateTimeUtils.SERVER_DATE_TIME;
@@ -68,6 +69,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
@@ -78,6 +80,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
@@ -159,6 +162,9 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
     private LottieAnimationView likeAnimation;
     private GestureDetector gestureDetector;
     private View touchView;
+    private TextView impressionTv;
+    private boolean isImpressionCountEnabled;
+
 
     public static FeedPostFrag newInstance(String postId) {
         FeedPostFrag feedPostFrag = new FeedPostFrag();
@@ -207,6 +213,7 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_feed);
         postContainer = view.findViewById(R.id.post_container);
         likeAnimation = view.findViewById(R.id.anim_feed_like);
+        impressionTv = view.findViewById(R.id.impressions_count);
         if (postId == null) {
             throw new IllegalArgumentException("Missing ARG_POST_ID for FeedPostFrag");
         }
@@ -232,6 +239,9 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
         postContainer.setOnTouchListener(this::onTouch);
         photoContentIv.setOnTouchListener(this::onTouch);
         commentRecyclerView.setOnTouchListener(this::onTouch);
+        isImpressionCountEnabled = FirebaseRemoteConfig.getInstance().getBoolean(IS_IMPRESSIONS_COUNT_ENABLED);
+        if(isImpressionCountEnabled)
+            impressionTv.setVisibility(View.VISIBLE);
         return view;
     }
 
@@ -343,7 +353,8 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
                                             handleReactionStats(enrichedActivity);
                                             handleReplyBottomSheet(enrichedActivity);
                                             handleLinkPreview(enrichedActivity);
-                                            trackPostImpression(enrichedActivity);
+                                            if(isImpressionCountEnabled)
+                                                trackPostImpression(enrichedActivity);
 
                                             shareLayout.setOnClickListener(v -> {
                                                 startShareWithPermissionCheck(FeedPostFrag.this, enrichedActivity, extras);
@@ -648,6 +659,18 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
         Map<String, Object> extras = enrichedActivity.getExtra();
         bundle.putString("postText", String.valueOf(extras.get("message") == null ? "" : extras.get("message")));
         Analytics.triggerEvent(AnalyticsEvents.FEED_POST_IMPRESSION, bundle, getContext());
+
+        Reaction impression = new Reaction.Builder()
+                .kind("impression")
+                .activityID(enrichedActivity.getID())
+                .build();
+
+        try {
+            timelineClient.reactions().add(impression).whenCompleteAsync((reaction,throwable)->{
+            });
+        } catch (StreamException e) {
+            e.printStackTrace();
+        }
     }
 
     private void handleReplyBottomSheet(EnrichedActivity enrichedActivity) {
@@ -790,6 +813,9 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
     private void handleReactionStats(EnrichedActivity enrichedActivity) {
         extractReactionCount(enrichedActivity, "like", likeTv, 0);
         extractReactionCount(enrichedActivity, "comment", replyTv, 0);
+        if(isImpressionCountEnabled)
+            extractReactionCount(enrichedActivity, "impression", impressionTv, 0);
+
     }
 
     private void extractReactionCount(EnrichedActivity enrichedActivity, @NotNull String reaction, TextView statsTv, int change) {
