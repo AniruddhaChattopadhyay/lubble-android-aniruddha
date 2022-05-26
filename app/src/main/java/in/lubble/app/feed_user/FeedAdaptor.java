@@ -8,13 +8,11 @@ import static in.lubble.app.utils.UiUtils.dpToPx;
 
 import android.animation.Animator;
 import android.annotation.SuppressLint;
-import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.util.Linkify;
@@ -57,9 +55,11 @@ import com.bumptech.glide.request.transition.Transition;
 import com.curios.textformatter.FormatText;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -72,22 +72,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import in.lubble.app.Constants;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.CustomURLSpan;
+import in.lubble.app.feed_post.FeedPostFrag;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.profile.ProfileActivity;
-import in.lubble.app.receivers.ShareSheetReceiver;
 import in.lubble.app.services.FeedServices;
-import in.lubble.app.utils.FeedUtils;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
+import io.getstream.cloud.CloudClient;
 import io.getstream.core.exceptions.StreamException;
+import io.getstream.core.models.Content;
 import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.FeedID;
 import io.getstream.core.models.Reaction;
@@ -105,10 +108,15 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     private final String userId = FirebaseAuth.getInstance().getUid();
     private String photoLink = null, videoLink = null;
     private final HashMap<Integer, ExoPlayer> exoplayerMap = new HashMap<>();
+    private CloudClient timelineClient;
+    private boolean isImpressionCountEnabled;
 
 
     public FeedAdaptor(@NotNull DiffUtil.ItemCallback<EnrichedActivity> diffCallback) {
         super(diffCallback);
+        timelineClient = FeedServices.getTimelineClient();
+//        isImpressionCountEnabled = FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_IMPRESSIONS_COUNT_ENABLED);
+        isImpressionCountEnabled = false;
     }
 
     public void setVars(Context context, int displayWidth, int displayHeight, GlideRequests glide, FeedListener feedListener) {
@@ -141,6 +149,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         holder.exoPlayerView.setVisibility(GONE);
         holder.groupNameTv.setVisibility(View.GONE);
         holder.lubbleNameTv.setVisibility(View.GONE);
+        if(isImpressionCountEnabled)
+            holder.impressionTv.setVisibility(View.VISIBLE);
         if (extras != null) {
             holder.textContentTv.setVisibility(View.VISIBLE);
             final String message = String.valueOf(extras.get("message") == null ? "" : extras.get("message"));
@@ -289,12 +299,30 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         }
         handleReactionStats(activity, holder);
         initCommentRecyclerView(holder, activity);
+        if(isImpressionCountEnabled)
+            trackPostImpression(activity);
         handleCommentEditText(activity, holder);
         handleLinkPreview(activity, holder);
 
         //setting the tooltip for the first post
         if (holder.getBindingAdapterPosition() == 0 && !LubbleSharedPrefs.getInstance().getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG()) {
             prepareDoubleTapToLikeTooltip(holder, extras);
+        }
+
+
+    }
+
+    private void trackPostImpression(EnrichedActivity enrichedActivity) {
+        Reaction impression = new Reaction.Builder()
+                .kind("impression")
+                .activityID(enrichedActivity.getID())
+                .build();
+        try {
+            timelineClient.reactions().add(impression).whenCompleteAsync((reaction,throwable)->{
+
+            });
+        } catch ( StreamException e) {
+            e.printStackTrace();
         }
     }
 
@@ -502,6 +530,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     private void handleReactionStats(EnrichedActivity enrichedActivity, MyViewHolder holder) {
         extractReactionCount(enrichedActivity, "like", holder.likeTv, 0);
         extractReactionCount(enrichedActivity, "comment", holder.replyTv, 0);
+        if(isImpressionCountEnabled)
+            extractReactionCount(enrichedActivity, "impression", holder.impressionTv, 0);
     }
 
     private void extractReactionCount(EnrichedActivity enrichedActivity, @NotNull String reaction, TextView statsTv, int change) {
@@ -557,7 +587,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             });
             try {
                 String notificationUserFeedId = "notification:" + activity.getActor().getID();
-                FeedServices.getTimelineClient().reactions().add(like, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
+                timelineClient.reactions().add(like, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                     if (throwable != null) {
                         FirebaseCrashlytics.getInstance().recordException(throwable);
                     }
@@ -667,7 +697,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         private final LinearLayout likeLayout, shareLayout;
         private final ImageView likeIv;
         private final LinearLayout commentLayout;
-        private final TextView commentEdtText, likeTv, replyTv;
+        private final TextView commentEdtText, likeTv, replyTv, impressionTv;
         private final RecyclerView commentRecyclerView;
         private final RelativeLayout linkPreviewContainer;
         private final PlayerView exoPlayerView;
@@ -798,6 +828,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             shareLayout = view.findViewById(R.id.cont_share);
             likeIv = view.findViewById(R.id.like_imageview);
             likeTv = view.findViewById(R.id.tv_like);
+            impressionTv = view.findViewById(R.id.impressions_count);
             replyTv = view.findViewById(R.id.tv_reply);
             commentLayout = view.findViewById(R.id.cont_reply);
             commentEdtText = view.findViewById(R.id.comment_edit_text);
