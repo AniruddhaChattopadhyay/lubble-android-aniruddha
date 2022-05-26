@@ -37,6 +37,8 @@
             android:text="0"
             android:textSize="14sp"
             app:drawableLeftCompat="@drawable/ice_eye_16dp"
+            tools:visibility="visible"
+            android:layout_marginTop="4dp"
             android:visibility="gone"/>
 
         <androidx.recyclerview.widget.RecyclerView

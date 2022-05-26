@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,13 +28,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import in.lubble.app.Constants;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.services.FeedServices;
+import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.Content;
 import io.getstream.core.models.EnrichedActivity;
+import io.getstream.core.models.Reaction;
 
 public class FeedUtils {
 
@@ -124,10 +129,12 @@ public class FeedUtils {
                 if (firstPos >= 0 && lastPos >= 0) {
                     EnrichedActivity firstActivity = enrichedActivities.get(firstPos);
                     if (firstPos == lastPos) {
+                        addPostImpression(firstActivity);
                         contentList.add(new Content(firstActivity.getForeignID()));
                         foreignIdList.add(firstActivity.getForeignID());
                     } else {
                         List<EnrichedActivity> subList = enrichedActivities.subList(firstPos, lastPos);
+                        addPostImpression(subList.toArray(new EnrichedActivity[0]));
                         contentList.addAll(Lists.transform(subList, input -> new Content(input.getForeignID())));
                         foreignIdList.addAll(Lists.transform(subList, input -> input.getForeignID()));
                     }
@@ -145,6 +152,24 @@ public class FeedUtils {
                 FirebaseCrashlytics.getInstance().recordException(e);
             }
         });
+    }
+
+    private static void addPostImpression(EnrichedActivity...enrichedActivities) {
+        if (FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_IMPRESSIONS_COUNT_ENABLED)) {
+            for (EnrichedActivity activity : enrichedActivities) {
+                Reaction impression = new Reaction.Builder()
+                        .kind("impression")
+                        .activityID(activity.getID())
+                        .build();
+                try {
+                    FeedServices.getTimelineClient().reactions().add(impression).whenCompleteAsync((reaction, throwable) -> {
+                    });
+                } catch (StreamException e) {
+                    e.printStackTrace();
+                    FirebaseCrashlytics.getInstance().recordException(e);
+                }
+            }
+        }
     }
 
 }

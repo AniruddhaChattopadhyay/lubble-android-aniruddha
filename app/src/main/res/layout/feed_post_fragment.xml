@@ -42,23 +42,24 @@
                 android:layout_below="@id/social_layout"/>
 
             <TextView
+                android:id="@+id/impressions_count"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/impressions_count"
                 android:layout_below="@id/sep_post"
+                android:layout_marginTop="4dp"
                 android:drawablePadding="5dp"
                 android:text="0"
                 android:textSize="14sp"
+                android:visibility="gone"
                 app:drawableLeftCompat="@drawable/ice_eye_16dp"
-                android:visibility="gone"/>
+                tools:visibility="visible" />
 
             <com.cooltechworks.views.shimmer.ShimmerRecyclerView
                 android:id="@+id/comment_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/impressions_count"
-                android:layout_marginTop="0dp"
-                android:paddingTop="4dp"
+                android:layout_marginTop="8dp"
                 android:clipToPadding="false"
                 android:nestedScrollingEnabled="false"
                 android:paddingBottom="40dp"

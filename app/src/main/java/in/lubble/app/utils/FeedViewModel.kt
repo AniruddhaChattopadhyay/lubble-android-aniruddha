@@ -16,7 +16,7 @@ class FeedViewModel : ViewModel() {
     val distinctLiveData: LiveData<VisibleState> =
             Transformations.distinctUntilChanged(liveData).debounce()
 
-    private fun <T> LiveData<T>.debounce(duration: Long = 2000L) = MediatorLiveData<T>().also { mld ->
+    private fun <T> LiveData<T>.debounce(duration: Long = 1500L) = MediatorLiveData<T>().also { mld ->
         val source = this
         val handler = Handler(Looper.getMainLooper())
 

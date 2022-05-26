@@ -46,13 +46,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import in.lubble.app.GlideApp;
-import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;

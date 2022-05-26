@@ -108,15 +108,9 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     private final String userId = FirebaseAuth.getInstance().getUid();
     private String photoLink = null, videoLink = null;
     private final HashMap<Integer, ExoPlayer> exoplayerMap = new HashMap<>();
-    private CloudClient timelineClient;
-    private boolean isImpressionCountEnabled;
-
 
     public FeedAdaptor(@NotNull DiffUtil.ItemCallback<EnrichedActivity> diffCallback) {
         super(diffCallback);
-        timelineClient = FeedServices.getTimelineClient();
-//        isImpressionCountEnabled = FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_IMPRESSIONS_COUNT_ENABLED);
-        isImpressionCountEnabled = false;
     }
 
     public void setVars(Context context, int displayWidth, int displayHeight, GlideRequests glide, FeedListener feedListener) {
@@ -149,8 +143,11 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         holder.exoPlayerView.setVisibility(GONE);
         holder.groupNameTv.setVisibility(View.GONE);
         holder.lubbleNameTv.setVisibility(View.GONE);
-        if(isImpressionCountEnabled)
+        if (FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_IMPRESSIONS_COUNT_ENABLED)) {
             holder.impressionTv.setVisibility(View.VISIBLE);
+        } else {
+            holder.impressionTv.setVisibility(GONE);
+        }
         if (extras != null) {
             holder.textContentTv.setVisibility(View.VISIBLE);
             final String message = String.valueOf(extras.get("message") == null ? "" : extras.get("message"));
@@ -299,30 +296,12 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         }
         handleReactionStats(activity, holder);
         initCommentRecyclerView(holder, activity);
-        if(isImpressionCountEnabled)
-            trackPostImpression(activity);
         handleCommentEditText(activity, holder);
         handleLinkPreview(activity, holder);
 
         //setting the tooltip for the first post
         if (holder.getBindingAdapterPosition() == 0 && !LubbleSharedPrefs.getInstance().getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG()) {
             prepareDoubleTapToLikeTooltip(holder, extras);
-        }
-
-
-    }
-
-    private void trackPostImpression(EnrichedActivity enrichedActivity) {
-        Reaction impression = new Reaction.Builder()
-                .kind("impression")
-                .activityID(enrichedActivity.getID())
-                .build();
-        try {
-            timelineClient.reactions().add(impression).whenCompleteAsync((reaction,throwable)->{
-
-            });
-        } catch ( StreamException e) {
-            e.printStackTrace();
         }
     }
 
@@ -530,8 +509,9 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     private void handleReactionStats(EnrichedActivity enrichedActivity, MyViewHolder holder) {
         extractReactionCount(enrichedActivity, "like", holder.likeTv, 0);
         extractReactionCount(enrichedActivity, "comment", holder.replyTv, 0);
-        if(isImpressionCountEnabled)
+        if (FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_IMPRESSIONS_COUNT_ENABLED)) {
             extractReactionCount(enrichedActivity, "impression", holder.impressionTv, 0);
+        }
     }
 
     private void extractReactionCount(EnrichedActivity enrichedActivity, @NotNull String reaction, TextView statsTv, int change) {
@@ -587,7 +567,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             });
             try {
                 String notificationUserFeedId = "notification:" + activity.getActor().getID();
-                timelineClient.reactions().add(like, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
+                FeedServices.getTimelineClient().reactions().add(like, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                     if (throwable != null) {
                         FirebaseCrashlytics.getInstance().recordException(throwable);
                     }
