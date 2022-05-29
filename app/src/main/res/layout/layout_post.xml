@@ -235,6 +235,12 @@
             <ImageView
                 android:layout_width="18dp"
                 android:layout_height="18dp"
+                app:srcCompat="@drawable/ic_whatsapp"/>
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginStart="4dp"
                 app:srcCompat="@drawable/ic_share_black_24dp"
                 app:tint="@color/md_grey_600" />
 

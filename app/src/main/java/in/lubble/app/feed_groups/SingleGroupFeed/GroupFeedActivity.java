@@ -199,7 +199,6 @@ public class GroupFeedActivity extends BaseActivity {
         FeedUserShareBottomSheetFrag feedUserShareBottomSheetFrag = new FeedUserShareBottomSheetFrag(feedGroupData.getFeedName(), feedGroupData);
         feedUserShareBottomSheetFrag.show(getSupportFragmentManager(), feedUserShareBottomSheetFrag.getTag());
         Bundle bundle = new Bundle();
-        bundle.putInt("group_id", feedGroupData.getId());
         bundle.putString("group_name", feedGroupData.getName());
         Analytics.triggerEvent(AnalyticsEvents.FEED_GROUP_INVITE_CLICKED, bundle, this);
     }
