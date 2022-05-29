@@ -154,7 +154,7 @@ public class FeedUtils {
         });
     }
 
-    private static void addPostImpression(EnrichedActivity...enrichedActivities) {
+    private static void addPostImpression(EnrichedActivity... enrichedActivities) {
         if (FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_IMPRESSIONS_COUNT_ENABLED)) {
             for (EnrichedActivity activity : enrichedActivities) {
                 Reaction impression = new Reaction.Builder()

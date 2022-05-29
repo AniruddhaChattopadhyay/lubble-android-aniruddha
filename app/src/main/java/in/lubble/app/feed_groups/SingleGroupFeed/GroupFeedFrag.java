@@ -1,6 +1,7 @@
 package in.lubble.app.feed_groups.SingleGroupFeed;
 
 import static android.app.Activity.RESULT_OK;
+import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedFragPermissionsDispatcher.startSharingPostWithPermissionCheck;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserFeedIntroRef;
@@ -304,9 +305,18 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
             } else {
                 UiUtils.animateSlideUpShow(getContext(), postBtnLl);
             }
-
-            VisibleState visibleState = new VisibleState(layoutManager.findFirstCompletelyVisibleItemPosition(),
-                    layoutManager.findLastCompletelyVisibleItemPosition());
+            int firstCompletelyVisibleItemPosition = layoutManager.findFirstCompletelyVisibleItemPosition();
+            int lastCompletelyVisibleItemPosition = layoutManager.findLastCompletelyVisibleItemPosition();
+            VisibleState visibleState;
+            if (firstCompletelyVisibleItemPosition == NO_POSITION && lastCompletelyVisibleItemPosition == NO_POSITION) {
+                // no post is completely visible: either 2 posts are partially visible or just 1 long post
+                // in both cases count the impression of both or the one single post
+                visibleState = new VisibleState(layoutManager.findFirstVisibleItemPosition(),
+                        layoutManager.findLastVisibleItemPosition());
+            } else {
+                visibleState = new VisibleState(firstCompletelyVisibleItemPosition,
+                        lastCompletelyVisibleItemPosition);
+            }
             viewModel.onScrolled(visibleState);
         }
     };

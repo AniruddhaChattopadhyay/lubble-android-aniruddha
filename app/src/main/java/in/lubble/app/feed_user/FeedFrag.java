@@ -1,6 +1,7 @@
 package in.lubble.app.feed_user;
 
 import static android.app.Activity.RESULT_OK;
+import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
 import static in.lubble.app.feed_user.FeedFragPermissionsDispatcher.startSharingPostWithPermissionCheck;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserFeedIntroRef;
@@ -399,8 +400,18 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             } else {
                 UiUtils.animateSlideUpShow(getContext(), postBtnLL);
             }
-            VisibleState visibleState = new VisibleState(layoutManager.findFirstCompletelyVisibleItemPosition(),
-                    layoutManager.findLastCompletelyVisibleItemPosition());
+            int firstCompletelyVisibleItemPosition = layoutManager.findFirstCompletelyVisibleItemPosition();
+            int lastCompletelyVisibleItemPosition = layoutManager.findLastCompletelyVisibleItemPosition();
+            VisibleState visibleState;
+            if (firstCompletelyVisibleItemPosition == NO_POSITION && lastCompletelyVisibleItemPosition == NO_POSITION) {
+                // no post is completely visible: either 2 posts are partially visible or just 1 long post
+                // in both cases count the impression of both or the one single post
+                visibleState = new VisibleState(layoutManager.findFirstVisibleItemPosition(),
+                        layoutManager.findLastVisibleItemPosition());
+            } else {
+                visibleState = new VisibleState(firstCompletelyVisibleItemPosition,
+                        lastCompletelyVisibleItemPosition);
+            }
             viewModel.onScrolled(visibleState);
         }
     };
