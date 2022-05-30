@@ -23,6 +23,7 @@ import static in.lubble.app.Constants.MSG_WATERMARK_TEXT;
 import static in.lubble.app.Constants.QUIZ_RESULT_UI;
 import static in.lubble.app.Constants.REFER_MSG;
 import static in.lubble.app.Constants.REWARDS_EXPLAINER;
+import static in.lubble.app.Constants.SHOW_IMPRESSIONS_COUNT;
 import static in.lubble.app.Constants.WIKI_URL;
 import static in.lubble.app.analytics.AnalyticsEvents.RATING_DIALOG_FORM;
 import static in.lubble.app.analytics.AnalyticsEvents.RATING_DIALOG_FORM_YES;
@@ -755,6 +756,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
         map.put(IS_CHATS_ENABLED_FOR_KML, false);
         map.put(IS_IMPRESSIONS_COUNT_ENABLED, true);
+        map.put(SHOW_IMPRESSIONS_COUNT, false);
         firebaseRemoteConfig.setDefaultsAsync(map);
         if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
             //toolbarRewardsTv.setVisibility(View.VISIBLE);

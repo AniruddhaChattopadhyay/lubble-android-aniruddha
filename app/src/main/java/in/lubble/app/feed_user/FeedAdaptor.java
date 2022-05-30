@@ -143,7 +143,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         holder.exoPlayerView.setVisibility(GONE);
         holder.groupNameTv.setVisibility(View.GONE);
         holder.lubbleNameTv.setVisibility(View.GONE);
-        if (FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_IMPRESSIONS_COUNT_ENABLED)) {
+        if (FirebaseRemoteConfig.getInstance().getBoolean(Constants.SHOW_IMPRESSIONS_COUNT)) {
             holder.impressionTv.setVisibility(View.VISIBLE);
         } else {
             holder.impressionTv.setVisibility(GONE);
@@ -509,7 +509,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     private void handleReactionStats(EnrichedActivity enrichedActivity, MyViewHolder holder) {
         extractReactionCount(enrichedActivity, "like", holder.likeTv, 0);
         extractReactionCount(enrichedActivity, "comment", holder.replyTv, 0);
-        if (FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_IMPRESSIONS_COUNT_ENABLED)) {
+        if (FirebaseRemoteConfig.getInstance().getBoolean(Constants.SHOW_IMPRESSIONS_COUNT)) {
             extractReactionCount(enrichedActivity, "impression", holder.impressionTv, 0);
         }
     }
