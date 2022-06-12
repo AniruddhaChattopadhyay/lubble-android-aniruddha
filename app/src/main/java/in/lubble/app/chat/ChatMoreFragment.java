@@ -74,7 +74,6 @@ public class ChatMoreFragment extends Fragment {
     private FrameLayout frameLayout;
     private ValueEventListener flairListener;
     private ValueEventListener eventsListener;
-    private FlairUpdateListener flairUpdateListener;
     private Endpoints endpoints;
 
     public ChatMoreFragment() {
@@ -231,7 +230,6 @@ public class ChatMoreFragment extends Fragment {
                                                 }
                                             });
                                             UiUtils.hideKeyboard(requireContext());
-                                            flairUpdateListener.onFlairUpdated();
                                         }
                                     });
                                 } else {
@@ -352,31 +350,10 @@ public class ChatMoreFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        try {
-            flairUpdateListener = (FlairUpdateListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
-                    + " must implement FlairUpdateListener");
-        }
-    }
-
-    public interface FlairUpdateListener {
-        void onFlairUpdated();
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
         if (flairListener != null) {
             getThisUserRef().removeEventListener(flairListener);
         }
-    }
-
-    @Override
-    public void onDetach() {
-        flairUpdateListener = null;
-        super.onDetach();
     }
 }

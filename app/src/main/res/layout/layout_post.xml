@@ -14,14 +14,14 @@
         android:paddingBottom="8dp"
         android:textColor="@color/md_grey_600"
         android:textStyle="bold"
-        app:drawableLeftCompat="@drawable/ic_group_black_14dp"
+        app:drawableLeftCompat="@drawable/ic_category_16"
         app:drawableTint="@color/md_grey_600"
         tools:text="Local News Group" />
 
     <ImageView
         android:id="@+id/feed_author_photo"
-        android:layout_width="38dp"
-        android:layout_height="38dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_below="@id/tv_group_name"
         android:layout_marginRight="8dp"
         app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
@@ -47,6 +47,26 @@
         android:ellipsize="end"
         android:maxLines="1"
         tools:text="Koramangala" />
+
+    <TextView
+        android:id="@+id/tv_badge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/feed_author_name"
+        android:layout_marginStart="4dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:textSize="12sp"
+        android:layout_toRightOf="@+id/tv_lubble_name"
+        android:background="@drawable/rect_rounded_lt_blue"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/colorAccent"
+        tools:text="8th block" />
 
     <ImageView
         android:id="@+id/iv_more_menu"

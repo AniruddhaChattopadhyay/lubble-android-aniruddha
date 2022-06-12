@@ -34,6 +34,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -68,6 +69,7 @@ import in.lubble.app.models.GroupInfoData;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.receivers.FlairUpdateListener;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.utils.FragUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
@@ -224,7 +226,10 @@ public class ProfileFrag extends Fragment {
             statusBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment(rootView);
+                    StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment(() -> {
+                        Snackbar.make(getView(), "Badge updated!", Snackbar.LENGTH_LONG).show();
+                        fetchProfileFeed();
+                    });
                     statusBottomSheetFragment.show(getFragmentManager(), statusBottomSheetFragment.getTag());
                 }
             });

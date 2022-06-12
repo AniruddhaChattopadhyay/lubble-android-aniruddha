@@ -19,6 +19,7 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -26,6 +27,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -34,6 +36,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.snackbar.Snackbar;
@@ -62,6 +65,7 @@ import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.profile.StatusBottomSheetFragment;
 import in.lubble.app.receivers.ShareSheetReceiver;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.FeedUtils;
@@ -469,6 +473,24 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     @Override
     public void onShareClicked(EnrichedActivity activity, Map<String, Object> extras) {
         startSharingPostWithPermissionCheck(FeedFrag.this, activity, extras);
+    }
+
+    @Override
+    public void onBadgeClicked(String name) {
+        Analytics.triggerEvent(AnalyticsEvents.CLICK_ON_OTHERS_STATUS, requireContext());
+        View dialogView = requireActivity().getLayoutInflater().inflate(R.layout.bottom_sheet_for_status_redirect, null);
+        final BottomSheetDialog dialog = new BottomSheetDialog(requireContext(), R.style.RoundedBottomSheetDialog);
+        TextView tv = dialogView.findViewById(R.id.status_redirect_tv);
+        tv.setText("You are viewing " + name + "'s badge. Set your badge from your profile or here \uD83D\uDC47");
+        Button btn = dialogView.findViewById(R.id.status_redirect_btn);
+        btn.setOnClickListener(v -> {
+            Analytics.triggerEvent(AnalyticsEvents.CLICK_ON_SET_STATUS_FROM_OTHERS_STATUS, requireContext());
+            StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment(getView());
+            statusBottomSheetFragment.show(((AppCompatActivity) requireContext()).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
+            dialog.dismiss();
+        });
+        dialog.setContentView(dialogView);
+        dialog.show();
     }
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)

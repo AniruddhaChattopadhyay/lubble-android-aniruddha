@@ -94,7 +94,7 @@ import static in.lubble.app.Constants.NEW_CHAT_ACTION;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.NotifUtils.sendNotifAnalyticEvent;
 
-public class ChatActivity extends BaseActivity implements ChatMoreFragment.FlairUpdateListener, SearchView.OnQueryTextListener {
+public class ChatActivity extends BaseActivity implements SearchView.OnQueryTextListener {
 
     private static final String TAG = "ChatActivity";
 
@@ -922,13 +922,4 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             super.onBackPressed();
         }
     }
-
-    @Override
-    public void onFlairUpdated() {
-        Fragment chatFrag = getSupportFragmentManager().findFragmentByTag(TAG_CHAT_FAG);
-        if (chatFrag instanceof ChatFragment) {
-            ((ChatFragment) chatFrag).updateThisUserFlair();
-        }
-    }
-
 }
