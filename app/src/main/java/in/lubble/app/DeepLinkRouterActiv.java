@@ -84,7 +84,11 @@ public class DeepLinkRouterActiv extends BaseActivity {
                         boolean handled = false;
                         if (referringParams != null && error == null) {
                             Log.d(TAG, "onInitFinished: " + referringParams.toString());
-                            openChatGroup(referringParams);
+                            String eventId = referringParams.optString("EVENT_ID");
+                            if(!TextUtils.isEmpty(eventId))
+                                EventInfoActivity.open(DeepLinkRouterActiv.this, eventId);
+                            else
+                                openChatGroup(referringParams);
                             handled = true;
                         } else {
                             Log.e(TAG, "onInitFinished: " + Branch.getInstance().getLatestReferringParams());
