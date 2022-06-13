@@ -268,6 +268,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
                         userAdapter.addGroupMembersList(groupMembersMap);
 
                         sharingProgressDialog = new ProgressDialog(getContext());
+                        groupData.setId(groupId);
                         generateBranchUrlForGroup(getContext(), linkCreateListener, groupData);
                         initClickHandlers(groupData);
                     }

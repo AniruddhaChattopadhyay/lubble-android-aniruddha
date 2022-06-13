@@ -78,7 +78,7 @@ public class ReferralUtils {
 
     public static void generateBranchUrlForGroup(Context context, Branch.BranchLinkCreateListener callback, GroupData groupData) {
         BranchUniversalObject branchUniversalObject = new BranchUniversalObject()
-                .setCanonicalIdentifier("lbl/groupInvite/" + groupData.getId())
+                .setCanonicalIdentifier("lubble://chats/?id=" + groupData.getId())
                 .setTitle("Invite to join " + groupData.getTitle() + " group")
                 .setContentDescription("Join me in " + groupData.getTitle() + " group for " + LubbleSharedPrefs.getInstance().getLubbleName())
                 .setContentImageUrl(groupData.getThumbnail())
@@ -97,7 +97,7 @@ public class ReferralUtils {
 
     public static void generateBranchUrlForFeedGroup(Context context, Branch.BranchLinkCreateListener callback, FeedGroupData feedGroupData) {
         BranchUniversalObject branchUniversalObject = new BranchUniversalObject()
-                .setCanonicalIdentifier("lbl/groupInvite/" + feedGroupData.getName())
+                .setCanonicalIdentifier("lubble://feed_group/?name=" + feedGroupData.getFeedName())
                 .setTitle("Invite to join " + feedGroupData.getName() + " group")
                 .setContentDescription("Join me in " + feedGroupData.getName() + " group for " + LubbleSharedPrefs.getInstance().getLubbleName())
                 .setContentImageUrl(feedGroupData.getPhotoUrl())
@@ -106,6 +106,7 @@ public class ReferralUtils {
                 .setContentMetadata(new ContentMetadata().addCustomMetadata("referrer_uid", FirebaseAuth.getInstance().getUid())
                         .addCustomMetadata("feed_group_feed_name", feedGroupData.getFeedName())
                         .addCustomMetadata("feed_group_photo_url", feedGroupData.getPhotoUrl())
+                        .addCustomMetadata("feed_group_name", feedGroupData.getName())
                         .addCustomMetadata("feed_group_name", feedGroupData.getName())
                 );
 

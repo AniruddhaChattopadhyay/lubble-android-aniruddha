@@ -66,11 +66,17 @@ public class GroupFeedActivity extends BaseActivity {
     private MaterialButton joinInviteBtn;
     private ProgressBar toolbarProgressBar;
 
+    /*
+    pass feed ID (no spaces)
+     */
     public static void open(Context context, String feedGroupName) {
         Log.d(TAG, "2nd Open function called");
         context.startActivity(getIntent(context, feedGroupName));
     }
 
+    /*
+    pass feed ID (no spaces)
+     */
     public static Intent getIntent(Context context, String feedGroupName) {
         Intent intent = new Intent(context, GroupFeedActivity.class);
         intent.putExtra(EXTRA_FEED_GROUP_NAME, feedGroupName);
