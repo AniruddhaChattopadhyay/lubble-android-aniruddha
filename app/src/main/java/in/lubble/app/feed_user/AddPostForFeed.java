@@ -1,5 +1,6 @@
 package in.lubble.app.feed_user;
 
+import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.utils.FileUtils.Video_Size;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getMimeType;
@@ -45,6 +46,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -56,10 +60,17 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.FeedPostData;
+import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
+import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.FileUtils;
+import in.lubble.app.utils.LinkMetaData;
 import in.lubble.app.utils.RoundedCornersTransformation;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class AddPostForFeed extends BaseActivity {
@@ -215,8 +226,9 @@ public class AddPostForFeed extends BaseActivity {
                     if (extractedUrl != null && !prevUrl.equalsIgnoreCase(extractedUrl)
                             && !isLinkPreviewClosedByUser) {
                         prevUrl = extractedUrl;
-                        linkMetaAsyncTask = new LinkMetaAsyncTask(prevUrl, getLinkMetaListener());
-                        linkMetaAsyncTask.execute();
+                        getLinkMetaData(prevUrl);
+//                        linkMetaAsyncTask = new LinkMetaAsyncTask(prevUrl, getLinkMetaListener());
+//                        linkMetaAsyncTask.execute();
                     } else if (extractedUrl == null) {
                         if (linkPreviewContainer.getVisibility() == View.VISIBLE) {
                             resetLinkPreview();
@@ -229,6 +241,44 @@ public class AddPostForFeed extends BaseActivity {
         });
     }
 
+    public void getLinkMetaData(String Url){
+        Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("url",Url);
+        }
+        catch (JSONException e){
+
+        }
+        RequestBody body = RequestBody.create(MEDIA_TYPE, String.valueOf(jsonObject));
+        endpoints.getLinkMetaData(body).enqueue(new Callback<LinkMetaData>() {
+            @Override
+            public void onResponse(Call<LinkMetaData> call, Response<LinkMetaData> response) {
+                LinkMetaData linkMetaData = response.body();
+                linkPreviewContainer.setVisibility(View.VISIBLE);
+                linkTitleTv.setText(linkMetaData.getTitle());
+                linkDescTv.setText(linkMetaData.getDesc());
+                feedPostData.setLinkTitle(linkMetaData.getTitle());
+                feedPostData.setLinkDesc(linkMetaData.getDesc());
+                feedPostData.setLinkUrl(prevUrl);
+                if (!TextUtils.isEmpty(linkMetaData.getImageUrl())) {
+                    feedPostData.setLinkImageUrl(linkMetaData.getImageUrl());
+                    GlideApp.with(AddPostForFeed.this)
+                            .load(linkMetaData.getImageUrl())
+                            .placeholder(R.drawable.ic_public_black_24dp)
+                            .error(R.drawable.ic_public_black_24dp)
+                            .into(linkImageIv);
+                } else {
+                    linkImageIv.setImageResource(R.drawable.ic_public_black_24dp);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LinkMetaData> call, Throwable t) {
+
+            }
+        });
+    }
     public void resetLinkPreview() {
         linkPreviewContainer.setVisibility(View.GONE);
         prevUrl = "";

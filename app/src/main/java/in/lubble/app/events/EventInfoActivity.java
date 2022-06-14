@@ -271,6 +271,7 @@ public class EventInfoActivity extends BaseActivity {
             sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Check Out this amazing Event I am going to attend");
             sharingIntent.putExtra(Intent.EXTRA_TEXT, eventData.getTitle() + " " +eventData.getDesc() + " " + sharingUrl);
             sharingIntent.putExtra(Intent.EXTRA_UID,eventData.getId());
+            sharingIntent.putExtra("branch_force_new_session", true);
             return sharingIntent;
         }
     }
@@ -281,9 +282,8 @@ public class EventInfoActivity extends BaseActivity {
 
     public void generateBranchUrl(Context context, @Nullable String campaignName, boolean showLinkMetaData, Branch.BranchLinkCreateListener callback,String eventId) {
         BranchUniversalObject branchUniversalObject = new BranchUniversalObject()
-                .setCanonicalIdentifier("lbl/referralCode/" + FirebaseAuth.getInstance().getUid())
-                .setContentMetadata(new ContentMetadata().addCustomMetadata("referrer_uid", FirebaseAuth.getInstance().getUid())
-                        .addCustomMetadata("EVENT_ID", eventId));
+                .setCanonicalIdentifier("lubble://events/?id=" + eventId)
+                .setContentMetadata(new ContentMetadata().addCustomMetadata("referrer_uid", FirebaseAuth.getInstance().getUid()));
 
         if (showLinkMetaData) {
             branchUniversalObject.setTitle(eventData.getTitle())
