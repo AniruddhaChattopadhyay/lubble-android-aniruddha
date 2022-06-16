@@ -33,6 +33,7 @@ import in.lubble.app.referrals.ReferralHistoryData;
 import in.lubble.app.referrals.ReferralLeaderboardData;
 import in.lubble.app.rewards.data.RewardCodesAirtableData;
 import in.lubble.app.rewards.data.RewardsAirtableData;
+import in.lubble.app.utils.LinkMetaData;
 import in.lubble.app.utils.YoutubeData;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -241,6 +242,9 @@ public interface Endpoints {
 
     @GET("marketplace/getFeedGroupInfo/")
     Call<FeedGroupData> getFeedGroupInfo(@Query("feedName") String feedName);
+
+    @POST("marketplace/getLinkMetaData/")
+    Call<LinkMetaData> getLinkMetaData(@Body RequestBody params);
 
     public class StreamCredentials {
         private String api_key;

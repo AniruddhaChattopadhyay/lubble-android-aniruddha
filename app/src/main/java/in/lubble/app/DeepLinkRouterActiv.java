@@ -73,54 +73,31 @@ public class DeepLinkRouterActiv extends BaseActivity {
             final String scheme = uri.getScheme().toLowerCase();
             final String host = uri.getHost().toLowerCase();
 
+
             if ("lubble".equals(scheme)) {
                 openCustomSchemeLink(uri);
             } else if ("https".equals(scheme) && "www.shop.lubble.in".equals(host) || "shop.lubble.in".equals(host)) {
                 openShopWebLink(uri);
             } else {
-                Branch.sessionBuilder(this).withCallback(new Branch.BranchReferralInitListener() {
-                    @Override
-                    public void onInitFinished(@Nullable JSONObject referringParams, @Nullable BranchError error) {
-                        boolean handled = false;
-                        if (referringParams != null && error == null) {
-                            Log.d(TAG, "onInitFinished: " + referringParams.toString());
-                            openChatGroup(referringParams);
-                            handled = true;
-                        } else {
-                            Log.e(TAG, "onInitFinished: " + Branch.getInstance().getLatestReferringParams());
-                            if (error != null && error.getErrorCode() == BranchError.ERR_BRANCH_ALREADY_INITIALIZED) {
-                                JSONObject latestReferringParams = Branch.getInstance().getLatestReferringParams();
-                                if (!TextUtils.isEmpty(latestReferringParams.toString())) {
-                                    openChatGroup(latestReferringParams);
-                                    handled = true;
-                                }
-                            }
-                        }
-                        if (!handled)
-                            startActivity(new Intent(DeepLinkRouterActiv.this, MainActivity.class));
-                    }
-
-                    public void openChatGroup(@NonNull JSONObject referringParams) {
-                        final String groupId = referringParams.optString("group_id");
-                        final String feedGroupFeedName = referringParams.optString("feed_group_feed_name");
-                        if (!TextUtils.isEmpty(groupId)) {
-                            ChatActivity.openForGroup(DeepLinkRouterActiv.this, groupId, false, null);
-                        } else if (!TextUtils.isEmpty(feedGroupFeedName)) {
-                            final String feedGroupName = referringParams.optString("feed_group_name");
-                            final String feedGroupPhotoUrl = referringParams.optString("feed_group_photo_url");
-                            FeedGroupData feedGroupData = new FeedGroupData(feedGroupName, feedGroupFeedName, feedGroupPhotoUrl, "");
-                            GroupFeedActivity.open(DeepLinkRouterActiv.this, feedGroupData);
-                        } else {
-                            startActivity(new Intent(DeepLinkRouterActiv.this, MainActivity.class));
+                // if activity is in foreground (or in backstack but partially visible) launching the same
+                // activity will skip onStart, handle this case with reInitSession
+                Branch.BranchUniversalReferralInitListener branchReferralInitListener = (branchUniversalObject, linkProperties, error) -> {
+                    // do something with branchUniversalObject/linkProperties..
+                    if (linkProperties != null && error == null) {
+                        openCustomSchemeLink(Uri.parse(branchUniversalObject.getCanonicalIdentifier()));
+                    } else {
+                        if (error != null) {
+                            Log.e(TAG, "onInitFinished: " + error.toString());
                         }
                     }
-                }).withData(this.getIntent().getData()).reInit();
+                };
+                getIntent().putExtra("branch_force_new_session", true);
+                Branch.sessionBuilder(this).withCallback(branchReferralInitListener).withData(getIntent().getData()).reInit();
             }
         } else {
             FirebaseCrashlytics.getInstance().recordException(new IllegalArgumentException("ILLEGAL INTENT for DeepLinkRouterActiv"));
             startActivity(new Intent(DeepLinkRouterActiv.this, MainActivity.class));
         }
-
     }
 
     private void openCustomSchemeLink(Uri uri) {
