@@ -56,6 +56,7 @@ import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -190,6 +191,83 @@ public class AddPostForFeed extends BaseActivity {
         showIntroCard();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        handleShareToLubble(getIntent());
+    }
+
+    private void handleShareToLubble(Intent intent) {
+        String action = intent.getAction();
+        String type = intent.getType();
+        if (FirebaseAuth.getInstance().getUid() == null) {
+            // user is trying to share to Lubble but is not logged in
+            Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, MainActivity.class));
+            finishAffinity();
+            return;
+        }
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if ("text/plain".equals(type)) {
+                handleSendText(intent);
+            } else if (type.startsWith("image/")) {
+                handleSendImage(intent);
+            } else if (type.startsWith("video/")) {
+                handleSendVideo(intent);
+            } else if (type.startsWith("application/pdf")) {
+                //handleSendPdf(intent);
+                Toast.makeText(this, "PDFs not supported, yet.", Toast.LENGTH_SHORT).show();
+            } else {
+                FirebaseCrashlytics.getInstance().recordException(new Exception("Unrecognized media type: " + type));
+                Toast.makeText(this, "Unrecognized media type", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void handleSendText(Intent intent) {
+        String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+        if (!TextUtils.isEmpty(sharedText)) {
+            postText.setText(sharedText);
+        }
+    }
+
+    private void handleSendImage(Intent intent) {
+        Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+        if (imageUri != null) {
+            // make a local copy of the img becoz our file upload service will lose auth for this URI
+            // since the service is not part of same context/process
+            attachImg(imageUri);
+            // look for any attached text caption
+            handleSendText(intent);
+        }
+    }
+
+    private void handleSendVideo(Intent intent) {
+        Uri videoUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+
+        String extension = FileUtils.getFileExtension(this, videoUri);
+        if (extension != null && extension.contains("mov")) {
+            Toast.makeText(getApplicationContext(), "Unsupported File Type", Toast.LENGTH_LONG).show();
+            finish();
+        } else {
+            File localVidFile = getFileFromInputStreamUri(this, videoUri);
+            Uri uri = Uri.fromFile(localVidFile);
+            attachVid(uri);
+            // look for any attached text caption
+            handleSendText(intent);
+        }
+    }
+
+    private void handleSendPdf(Intent intent) {
+        /*Uri pdfUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+        if (pdfUri != null) {
+            // make a local copy of the img becoz our file upload service will lose auth for this URI
+            // since the service is not part of same context/process
+            File localImgFile = getFileFromInputStreamUri(this, pdfUri);
+            this.mediaUri = Uri.fromFile(localImgFile);
+        }*/
+    }
+
     private void showIntroCard() {
         if (isIntro) {
             introMcv.setVisibility(View.VISIBLE);
@@ -319,52 +397,60 @@ public class AddPostForFeed extends BaseActivity {
                 imageFile = getFileFromInputStreamUri(this, uri);
             }
             if (type != null && (type.contains("image") || type.contains("jpg") || type.contains("jpeg"))) {//returnValue != null && !returnValue.isEmpty()
-                exoPlayerView.setVisibility(View.GONE);
-                imageFile = getFileFromInputStreamUri(this, uri);
-                uri = Uri.fromFile(imageFile);
-
-                addPhotoToFeedTv.setText("Change Media");
-                photoLink = uri.toString();
-
-                attachedPicIv.setVisibility(View.VISIBLE);
-                GlideApp.with(this)
-                        .load(uri)
-                        .transform(new RoundedCornersTransformation(dpToPx(8), 0))
-                        .into(attachedPicIv);
+                attachImg(uri);
             } else if (returnValue != null && (type.contains("video") || type.contains("mp4"))) {
-                attachedPicIv.setVisibility(View.GONE);
-                String extension = FileUtils.getFileExtension(this, uri);
-                addPhotoToFeedTv.setText("Change Media");
-                if (!TextUtils.isEmpty(extension) && extension.contains("mov")) {
-                    Toast.makeText(this, "Unsupported File type", Toast.LENGTH_LONG).show();
-                } else {
-                    File videoFile;
-                    videoFile = getFileFromInputStreamUri(this, uri);
-                    Video_Size = videoFile.length() / (1024f * 1024f);
-                    if (Video_Size > PERMITTED_VIDEO_SIZE) {
-                        Toast.makeText(this, "Choose a video size less than 30 MB", Toast.LENGTH_LONG).show();
-                        videoFile.delete();
-                    } else {
-                        final Uri vidUri = Uri.fromFile(videoFile);
-                        videoLink = vidUri.toString();
-                        exoPlayerView.setVisibility(View.VISIBLE);
-                        prepareExoPlayerFromFileUri(vidUri);
-                        exoPlayer.setPlayWhenReady(false);
-                        muteVideo(exoPlayer);
-                    }
-                }
+                attachVid(uri);
             } else {
                 Toast.makeText(this, R.string.all_something_wrong_try_again, Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-    public void muteVideo(ExoPlayer exoPlayer){
-        if(exoPlayer.getVolume() == 0F) {
+    private void attachVid(Uri uri) {
+        attachedPicIv.setVisibility(View.GONE);
+        String extension = FileUtils.getFileExtension(this, uri);
+        addPhotoToFeedTv.setText("Change Media");
+        if (!TextUtils.isEmpty(extension) && extension.contains("mov")) {
+            Toast.makeText(this, "Unsupported File type", Toast.LENGTH_LONG).show();
+        } else {
+            File videoFile;
+            videoFile = getFileFromInputStreamUri(this, uri);
+            Video_Size = videoFile.length() / (1024f * 1024f);
+            if (Video_Size > PERMITTED_VIDEO_SIZE) {
+                Toast.makeText(this, "Choose a video size less than 30 MB", Toast.LENGTH_LONG).show();
+                videoFile.delete();
+            } else {
+                final Uri vidUri = Uri.fromFile(videoFile);
+                videoLink = vidUri.toString();
+                exoPlayerView.setVisibility(View.VISIBLE);
+                prepareExoPlayerFromFileUri(vidUri);
+                exoPlayer.setPlayWhenReady(false);
+                //muteVideo(exoPlayer);
+            }
+        }
+    }
+
+    private void attachImg(Uri uri) {
+        File imageFile;
+        exoPlayerView.setVisibility(View.GONE);
+        imageFile = getFileFromInputStreamUri(this, uri);
+        uri = Uri.fromFile(imageFile);
+
+        addPhotoToFeedTv.setText("Change Media");
+        photoLink = uri.toString();
+
+        attachedPicIv.setVisibility(View.VISIBLE);
+        GlideApp.with(this)
+                .load(uri)
+                .transform(new RoundedCornersTransformation(dpToPx(8), 0))
+                .into(attachedPicIv);
+    }
+
+    public void muteVideo(ExoPlayer exoPlayer) {
+        if (exoPlayer.getVolume() == 0F) {
             exoPlayer.setVolume(0.75F);
             muteBtn.setImageResource(R.drawable.ic_mute);
-        }
-        else{
+        } else {
             exoPlayer.setVolume(0F);
             muteBtn.setImageResource(R.drawable.ic_volume_up_black_24dp);
         }
@@ -422,6 +508,16 @@ public class AddPostForFeed extends BaseActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        /*
+        If this activity is already open then onResume will be called but
+        it'll have the old intent, so here we reset it. onNewIntent() is called before onResume.
+        */
+        this.setIntent(intent);
     }
 
     @Override

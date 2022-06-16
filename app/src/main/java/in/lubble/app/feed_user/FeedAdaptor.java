@@ -55,7 +55,6 @@ import com.bumptech.glide.request.transition.Transition;
 import com.curios.textformatter.FormatText;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -72,7 +71,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.Constants;
@@ -82,15 +80,12 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.CustomURLSpan;
-import in.lubble.app.feed_post.FeedPostFrag;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
-import io.getstream.cloud.CloudClient;
 import io.getstream.core.exceptions.StreamException;
-import io.getstream.core.models.Content;
 import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.FeedID;
 import io.getstream.core.models.Reaction;
@@ -280,6 +275,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             }
         }
         holder.timePostedTv.setText(postDateDisplay);
+        populateBadge(holder.badgeTv, activity.getActor().getData());
 
         List<Reaction> userLikes = activity.getOwnReactions().get("like");
         if (userLikes != null && userLikes.size() > 0) {
@@ -302,6 +298,21 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         //setting the tooltip for the first post
         if (holder.getBindingAdapterPosition() == 0 && !LubbleSharedPrefs.getInstance().getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG()) {
             prepareDoubleTapToLikeTooltip(holder, extras);
+        }
+    }
+
+    private void populateBadge(TextView badgeTv, Map<String, Object> actorMap) {
+        if (actorMap.containsKey("badge") && actorMap.get("badge") != null) {
+            badgeTv.setVisibility(View.VISIBLE);
+            badgeTv.setText(String.valueOf(actorMap.get("badge")));
+            badgeTv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    feedListener.onBadgeClicked(String.valueOf(actorMap.get("name")));
+                }
+            });
+        } else {
+            badgeTv.setVisibility(GONE);
         }
     }
 
@@ -478,6 +489,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         void showEmptyView(boolean show);
 
         void onShareClicked(EnrichedActivity activity, Map<String, Object> extras);
+
+        void onBadgeClicked(String name);
     }
 
     private void initCommentRecyclerView(MyViewHolder holder, EnrichedActivity activity) {
@@ -673,7 +686,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         private final EmojiTextView textContentTv;
         private final ImageView photoContentIv;
         private final ImageView authorPhotoIv, linkImageIv;
-        private final TextView viewAllRepliesTv, authorNameTv, timePostedTv, groupNameTv, lubbleNameTv, linkTitleTv, linkDescTv;
+        private final TextView viewAllRepliesTv, authorNameTv, timePostedTv, groupNameTv, lubbleNameTv, badgeTv, linkTitleTv, linkDescTv;
         private final LinearLayout likeLayout, shareLayout;
         private final ImageView likeIv;
         private final LinearLayout commentLayout;
@@ -801,6 +814,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             authorNameTv = view.findViewById(R.id.feed_author_name);
             groupNameTv = view.findViewById(R.id.tv_group_name);
             lubbleNameTv = view.findViewById(R.id.tv_lubble_name);
+            badgeTv = view.findViewById(R.id.tv_badge);
             authorPhotoIv = view.findViewById(R.id.feed_author_photo);
             viewAllRepliesTv = view.findViewById(R.id.tv_view_all_replies);
             timePostedTv = view.findViewById(R.id.feed_post_timestamp);

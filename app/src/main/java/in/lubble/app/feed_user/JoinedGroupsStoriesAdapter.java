@@ -40,7 +40,7 @@ public class JoinedGroupsStoriesAdapter extends RecyclerView.Adapter<JoinedGroup
         this.storyDataList = storyDataList;
         this.joinedGroupsListener = joinedGroupsListener;
         FeedGroupData feedGroupData = new FeedGroupData("More Groups", "Explore Feed", "Lubble");
-        this.storyDataList.add(feedGroupData);
+        this.storyDataList.add(0, feedGroupData);
 
     }
 

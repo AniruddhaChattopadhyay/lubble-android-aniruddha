@@ -34,6 +34,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -44,6 +45,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
@@ -66,6 +68,7 @@ import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.FileDataSource;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -96,6 +99,7 @@ import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.profile.StatusBottomSheetFragment;
 import in.lubble.app.receivers.ShareSheetReceiver;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.CompleteListener;
@@ -142,7 +146,7 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
     private RelativeLayout mediaLayout;
     private ImageView photoContentIv;
     private ImageView authorPhotoIv;
-    private TextView authorNameTv, timePostedTv, groupNameTv, lubbleNameTv;
+    private TextView authorNameTv, timePostedTv, groupNameTv, lubbleNameTv, badgeTv;
     private LinearLayout likeLayout, shareLayout;
     private TextView likeTv, replyTv, noRepliesHelpTextTv, linkTitleTv, linkDescTv;
     private ImageView likeIv, replyIv, linkImageIv, moreMenuIv;
@@ -187,6 +191,7 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
         lubbleNameTv = view.findViewById(R.id.tv_lubble_name);
         authorPhotoIv = view.findViewById(R.id.feed_author_photo);
         timePostedTv = view.findViewById(R.id.feed_post_timestamp);
+        badgeTv = view.findViewById(R.id.tv_badge);
         likeLayout = view.findViewById(R.id.cont_like);
         shareLayout = view.findViewById(R.id.cont_share);
         likeTv = view.findViewById(R.id.tv_like);
@@ -305,7 +310,10 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
                                                 }
                                                 if (extras.containsKey("lubble_id")) {
                                                     lubbleNameTv.setVisibility(View.VISIBLE);
-                                                    lubbleNameTv.setText(extras.get("lubble_id").toString());
+                                                    if (extras.containsKey("lubble_name"))
+                                                        lubbleNameTv.setText(extras.get("lubble_name").toString());
+                                                    else
+                                                        lubbleNameTv.setText(extras.get("lubble_id").toString());
                                                 }
                                                 if (extras.containsKey("feed_name")) {
                                                     String groupFeedName = extras.get("feed_name").toString();
@@ -327,6 +335,7 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
                                                             .into(authorPhotoIv);
                                                 }
                                             }
+                                            populateBadge(badgeTv, actorMap);
                                             timePostedTv.setText(DateTimeUtils.getHumanTimestampWithTime(enrichedActivity.getTime().getTime()));
                                             initCommentRecyclerView(enrichedActivity);
 
@@ -380,6 +389,30 @@ public class FeedPostFrag extends Fragment implements SwipeRefreshLayout.OnRefre
             if (isAdded()) {
                 swipeRefreshLayout.setRefreshing(false);
             }
+        }
+    }
+
+    private void populateBadge(TextView badgeTv, Map<String, Object> actorMap) {
+        if (actorMap.containsKey("badge") && actorMap.get("badge") != null) {
+            badgeTv.setVisibility(View.VISIBLE);
+            badgeTv.setText(String.valueOf(actorMap.get("badge")));
+            badgeTv.setOnClickListener(v -> {Analytics.triggerEvent(AnalyticsEvents.CLICK_ON_OTHERS_STATUS, requireContext());
+                View dialogView = requireActivity().getLayoutInflater().inflate(R.layout.bottom_sheet_for_status_redirect, null);
+                final BottomSheetDialog dialog = new BottomSheetDialog(requireContext(), R.style.RoundedBottomSheetDialog);
+                TextView tv = dialogView.findViewById(R.id.status_redirect_tv);
+                tv.setText("You are viewing " + actorMap.get("name") + "'s badge. Set your badge from your profile or here \uD83D\uDC47");
+                Button btn = dialogView.findViewById(R.id.status_redirect_btn);
+                btn.setOnClickListener(v2 -> {
+                    Analytics.triggerEvent(AnalyticsEvents.CLICK_ON_SET_STATUS_FROM_OTHERS_STATUS, requireContext());
+                    StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment(getView());
+                    statusBottomSheetFragment.show(((AppCompatActivity) requireContext()).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
+                    dialog.dismiss();
+                });
+                dialog.setContentView(dialogView);
+                dialog.show();
+            });
+        } else {
+            badgeTv.setVisibility(GONE);
         }
     }
 
