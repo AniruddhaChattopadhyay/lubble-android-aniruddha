@@ -252,7 +252,7 @@ public class AddPostForFeed extends BaseActivity {
         endpoints.getLinkMetaData(body).enqueue(new Callback<LinkMetaData>() {
             @Override
             public void onResponse(Call<LinkMetaData> call, Response<LinkMetaData> response) {
-                if (response.isSuccessful()) {
+                if (!isFinishing() && response.isSuccessful()) {
                     LinkMetaData linkMetaData = response.body();
                     linkPreviewContainer.setVisibility(View.VISIBLE);
                     linkTitleTv.setText(linkMetaData.getTitle());
@@ -271,7 +271,7 @@ public class AddPostForFeed extends BaseActivity {
                         linkImageIv.setImageResource(R.drawable.ic_public_black_24dp);
                     }
                 }
-                else
+                else if(!isFinishing())
                     Toast.makeText(getApplicationContext(), "error: " + response.message(), Toast.LENGTH_SHORT).show();
             }
 
