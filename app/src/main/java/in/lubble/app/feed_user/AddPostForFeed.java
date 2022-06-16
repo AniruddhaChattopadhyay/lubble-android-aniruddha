@@ -226,9 +226,7 @@ public class AddPostForFeed extends BaseActivity {
                     if (extractedUrl != null && !prevUrl.equalsIgnoreCase(extractedUrl)
                             && !isLinkPreviewClosedByUser) {
                         prevUrl = extractedUrl;
-                        getLinkMetaData(prevUrl);
-//                        linkMetaAsyncTask = new LinkMetaAsyncTask(prevUrl, getLinkMetaListener());
-//                        linkMetaAsyncTask.execute();
+                        getLinkMetaData(extractedUrl);
                     } else if (extractedUrl == null) {
                         if (linkPreviewContainer.getVisibility() == View.VISIBLE) {
                             resetLinkPreview();
@@ -241,11 +239,11 @@ public class AddPostForFeed extends BaseActivity {
         });
     }
 
-    public void getLinkMetaData(String Url){
+    public void getLinkMetaData(String url){
         Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("url",Url);
+            jsonObject.put("url",url);
         }
         catch (JSONException e){
 
@@ -254,28 +252,32 @@ public class AddPostForFeed extends BaseActivity {
         endpoints.getLinkMetaData(body).enqueue(new Callback<LinkMetaData>() {
             @Override
             public void onResponse(Call<LinkMetaData> call, Response<LinkMetaData> response) {
-                LinkMetaData linkMetaData = response.body();
-                linkPreviewContainer.setVisibility(View.VISIBLE);
-                linkTitleTv.setText(linkMetaData.getTitle());
-                linkDescTv.setText(linkMetaData.getDesc());
-                feedPostData.setLinkTitle(linkMetaData.getTitle());
-                feedPostData.setLinkDesc(linkMetaData.getDesc());
-                feedPostData.setLinkUrl(prevUrl);
-                if (!TextUtils.isEmpty(linkMetaData.getImageUrl())) {
-                    feedPostData.setLinkImageUrl(linkMetaData.getImageUrl());
-                    GlideApp.with(AddPostForFeed.this)
-                            .load(linkMetaData.getImageUrl())
-                            .placeholder(R.drawable.ic_public_black_24dp)
-                            .error(R.drawable.ic_public_black_24dp)
-                            .into(linkImageIv);
-                } else {
-                    linkImageIv.setImageResource(R.drawable.ic_public_black_24dp);
+                if (response.isSuccessful()) {
+                    LinkMetaData linkMetaData = response.body();
+                    linkPreviewContainer.setVisibility(View.VISIBLE);
+                    linkTitleTv.setText(linkMetaData.getTitle());
+                    linkDescTv.setText(linkMetaData.getDesc());
+                    feedPostData.setLinkTitle(linkMetaData.getTitle());
+                    feedPostData.setLinkDesc(linkMetaData.getDesc());
+                    feedPostData.setLinkUrl(url);
+                    if (!TextUtils.isEmpty(linkMetaData.getImageUrl())) {
+                        feedPostData.setLinkImageUrl(linkMetaData.getImageUrl());
+                        GlideApp.with(AddPostForFeed.this)
+                                .load(linkMetaData.getImageUrl())
+                                .placeholder(R.drawable.ic_public_black_24dp)
+                                .error(R.drawable.ic_public_black_24dp)
+                                .into(linkImageIv);
+                    } else {
+                        linkImageIv.setImageResource(R.drawable.ic_public_black_24dp);
+                    }
                 }
+                else
+                    Toast.makeText(getApplicationContext(), "error: " + response.message(), Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(Call<LinkMetaData> call, Throwable t) {
-
+                Toast.makeText(getApplicationContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -393,40 +395,7 @@ public class AddPostForFeed extends BaseActivity {
         exoPlayer.prepare();
     }
 
-    private LinkMetaListener getLinkMetaListener() {
-        return new LinkMetaListener() {
-            @Override
-            public void onMetaFetched(final String title, final String desc, final String imgUrl) {
-                if (!isFinishing()) {
-                    runOnUiThread(() -> {
-                        linkPreviewContainer.setVisibility(View.VISIBLE);
-                        linkTitleTv.setText(title);
-                        linkDescTv.setText(desc);
-                        feedPostData.setLinkTitle(title);
-                        feedPostData.setLinkDesc(desc);
-                        feedPostData.setLinkUrl(prevUrl);
-                        if (!TextUtils.isEmpty(imgUrl)) {
-                            feedPostData.setLinkImageUrl(imgUrl);
-                            GlideApp.with(AddPostForFeed.this)
-                                    .load(imgUrl)
-                                    .placeholder(R.drawable.ic_public_black_24dp)
-                                    .error(R.drawable.ic_public_black_24dp)
-                                    .into(linkImageIv);
-                        } else {
-                            linkImageIv.setImageResource(R.drawable.ic_public_black_24dp);
-                        }
-                    });
-                }
-            }
 
-            @Override
-            public void onMetaFailed() {
-                if (!isFinishing()) {
-                    runOnUiThread(() -> linkPreviewContainer.setVisibility(View.GONE));
-                }
-            }
-        };
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
