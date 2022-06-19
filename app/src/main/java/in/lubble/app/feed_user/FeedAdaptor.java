@@ -767,7 +767,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 
                     case R.id.cont_link_preview:
                         if (activity.getExtra().containsKey("linkUrl")) {
-                            String linkUrl = ((String) activity.getExtra().get("linkUrl")).toLowerCase();
+                            String linkUrl = ((String) activity.getExtra().get("linkUrl"));
                             CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
                             intentBuilder.setToolbarColor(ContextCompat.getColor(context, R.color.colorAccent));
                             intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(context, R.color.dk_colorAccent));

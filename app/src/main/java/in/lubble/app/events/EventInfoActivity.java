@@ -251,8 +251,8 @@ public class EventInfoActivity extends BaseActivity {
         }
 
         shareTv.setOnClickListener(v -> {
-            final Intent sharingIntent = getSharingIntent(this,eventData, sharingUrl, progressDialog, linkCreateListener);
-            if(sharingIntent!=null)
+            final Intent sharingIntent = getSharingIntent(this, eventData, sharingUrl, progressDialog, linkCreateListener);
+            if (sharingIntent != null)
                 startActivity(Intent.createChooser(sharingIntent, getString(R.string.refer_share_title)));
         });
     }
@@ -262,35 +262,35 @@ public class EventInfoActivity extends BaseActivity {
             sharingProgressDialog.setTitle("Generating Event Link");
             sharingProgressDialog.setMessage(context.getString(R.string.all_please_wait));
             sharingProgressDialog.show();
-            generateBranchUrl(context, callback,eventId);
+            generateBranchUrl(context, callback, eventId);
             return null;
         } else {
             // URL is ready to be wrapped in an Intent
             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
             sharingIntent.setType("text/plain");
-            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Check Out this amazing Event I am going to attend");
-            sharingIntent.putExtra(Intent.EXTRA_TEXT, eventData.getTitle() + " " +eventData.getDesc() + " " + sharingUrl);
-            sharingIntent.putExtra(Intent.EXTRA_UID,eventData.getId());
+            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Check Out this amazing event I am going to attend");
+            sharingIntent.putExtra(Intent.EXTRA_TEXT, eventData.getTitle() + " " + eventData.getDesc() + " " + sharingUrl);
+            sharingIntent.putExtra(Intent.EXTRA_UID, eventData.getId());
             sharingIntent.putExtra("branch_force_new_session", true);
             return sharingIntent;
         }
     }
 
-    public void generateBranchUrl(Context context, Branch.BranchLinkCreateListener callback,String eventId) {
-        generateBranchUrl(context, null, true, callback,eventId);
+    public void generateBranchUrl(Context context, Branch.BranchLinkCreateListener callback, String eventId) {
+        generateBranchUrl(context, null, true, callback, eventId);
     }
 
-    public void generateBranchUrl(Context context, @Nullable String campaignName, boolean showLinkMetaData, Branch.BranchLinkCreateListener callback,String eventId) {
+    public void generateBranchUrl(Context context, @Nullable String campaignName, boolean showLinkMetaData, Branch.BranchLinkCreateListener callback, String eventId) {
         BranchUniversalObject branchUniversalObject = new BranchUniversalObject()
                 .setCanonicalIdentifier("lubble://events/?id=" + eventId)
                 .setContentMetadata(new ContentMetadata().addCustomMetadata("referrer_uid", FirebaseAuth.getInstance().getUid()));
 
         if (showLinkMetaData) {
             branchUniversalObject.setTitle(eventData.getTitle())
-                    .setContentDescription("View nearby events on Lubble")
+                    .setContentDescription(eventData.getDesc())
                     .setContentIndexingMode(BranchUniversalObject.CONTENT_INDEX_MODE.PUBLIC)
                     .setLocalIndexMode(BranchUniversalObject.CONTENT_INDEX_MODE.PUBLIC);
-            if(!TextUtils.isEmpty(eventData.getProfilePic()))
+            if (!TextUtils.isEmpty(eventData.getProfilePic()))
                 branchUniversalObject.setContentImageUrl(eventData.getProfilePic());
             else
                 branchUniversalObject.setContentImageUrl("https://i.imgur.com/JFsrCOs.png");
@@ -320,6 +320,11 @@ public class EventInfoActivity extends BaseActivity {
                 if (progressDialog != null && progressDialog.isShowing()) {
                     progressDialog.dismiss();
                 }
+                if (!isFinishing()) {
+                    final Intent sharingIntent = getSharingIntent(EventInfoActivity.this, eventData, sharingUrl, progressDialog, linkCreateListener);
+                    if (sharingIntent != null)
+                        startActivity(Intent.createChooser(sharingIntent, getString(R.string.refer_share_title)));
+                }
             } else {
                 Log.e(TAG, "Branch onLinkCreate: " + error.getMessage());
                 FirebaseCrashlytics.getInstance().recordException(new IllegalStateException(error.getMessage()));
@@ -330,7 +335,7 @@ public class EventInfoActivity extends BaseActivity {
         }
     };
 
-    private void shareEvent(Intent sharingIntent){
+    private void shareEvent(Intent sharingIntent) {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 this, 21,
                 new Intent(this, ShareSheetReceiver.class),
@@ -343,6 +348,7 @@ public class EventInfoActivity extends BaseActivity {
         }
         Analytics.triggerEvent(AnalyticsEvents.MSG_SHARED, this);
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -353,7 +359,7 @@ public class EventInfoActivity extends BaseActivity {
         //********************************************************************************
         if (eventData != null) {
             if (TextUtils.isEmpty(sharingUrl))
-                generateBranchUrl(this,linkCreateListener,eventId);
+                generateBranchUrl(this, linkCreateListener, eventId);
             final List<EventMemberData> members = eventData.getMembers();
             for (EventMemberData eventMemberData : members) {
                 if (eventMemberData.getUid().equals(FirebaseAuth.getInstance().getUid())) {

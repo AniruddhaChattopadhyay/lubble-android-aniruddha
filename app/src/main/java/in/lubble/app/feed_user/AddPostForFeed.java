@@ -317,16 +317,14 @@ public class AddPostForFeed extends BaseActivity {
         });
     }
 
-    public void getLinkMetaData(String url){
+    public void getLinkMetaData(String url) {
         Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("url",url);
+            jsonObject.put("url", url);
+        } catch (JSONException e) {
         }
-        catch (JSONException e){
-
-        }
-        RequestBody body = RequestBody.create(MEDIA_TYPE, String.valueOf(jsonObject));
+        RequestBody body = RequestBody.create(String.valueOf(jsonObject), MEDIA_TYPE);
         endpoints.getLinkMetaData(body).enqueue(new Callback<LinkMetaData>() {
             @Override
             public void onResponse(Call<LinkMetaData> call, Response<LinkMetaData> response) {
@@ -348,17 +346,19 @@ public class AddPostForFeed extends BaseActivity {
                     } else {
                         linkImageIv.setImageResource(R.drawable.ic_public_black_24dp);
                     }
-                }
-                else if(!isFinishing())
+                } else if (!isFinishing())
                     Toast.makeText(getApplicationContext(), "error: " + response.message(), Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(Call<LinkMetaData> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                if (!isFinishing()) {
+                    Toast.makeText(getApplicationContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
+
     public void resetLinkPreview() {
         linkPreviewContainer.setVisibility(View.GONE);
         prevUrl = "";
@@ -480,7 +480,6 @@ public class AddPostForFeed extends BaseActivity {
         exoPlayerView.setPlayer(exoPlayer);
         exoPlayer.prepare();
     }
-
 
 
     @Override

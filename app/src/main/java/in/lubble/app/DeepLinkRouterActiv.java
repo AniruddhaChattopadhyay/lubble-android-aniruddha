@@ -52,12 +52,6 @@ public class DeepLinkRouterActiv extends BaseActivity {
             FirebaseCrashlytics.getInstance().recordException(new IllegalAccessException("tried to open deeplink without login"));
             finish();
         }
-        Branch branch = Branch.getInstance();
-        CleverTapAPI clevertapInstance = CleverTapAPI.getDefaultInstance(this);
-        if (clevertapInstance != null) {
-            branch.setRequestMetadata("$clevertap_attribution_id",
-                    clevertapInstance.getCleverTapAttributionIdentifier());
-        }
     }
 
     @Override
@@ -70,6 +64,12 @@ public class DeepLinkRouterActiv extends BaseActivity {
     protected void onStart() {
         super.onStart();
         final Uri uri = getIntent().getData();
+        Branch branch = Branch.getInstance();
+        CleverTapAPI clevertapInstance = CleverTapAPI.getDefaultInstance(this);
+        if (clevertapInstance != null) {
+            branch.setRequestMetadata("$clevertap_attribution_id",
+                    clevertapInstance.getCleverTapAttributionIdentifier());
+        }
 
         if (uri != null) {
             final String scheme = uri.getScheme().toLowerCase();
@@ -89,12 +89,14 @@ public class DeepLinkRouterActiv extends BaseActivity {
                             openCustomSchemeLink(Uri.parse(branchUniversalObject.getCanonicalIdentifier()));
                         } else {
                             startActivity(new Intent(DeepLinkRouterActiv.this, MainActivity.class));
+                            finish();
                         }
                     } else {
                         if (error != null) {
                             Log.e(TAG, "onInitFinished: " + error.toString());
                         }
                         startActivity(new Intent(DeepLinkRouterActiv.this, MainActivity.class));
+                        finish();
                     }
                 };
                 getIntent().putExtra("branch_force_new_session", true);
@@ -103,8 +105,8 @@ public class DeepLinkRouterActiv extends BaseActivity {
         } else {
             FirebaseCrashlytics.getInstance().recordException(new IllegalArgumentException("ILLEGAL INTENT for DeepLinkRouterActiv"));
             startActivity(new Intent(DeepLinkRouterActiv.this, MainActivity.class));
+            finish();
         }
-        finish();
     }
 
     private void openCustomSchemeLink(Uri uri) {
@@ -224,6 +226,7 @@ public class DeepLinkRouterActiv extends BaseActivity {
             default:
                 startActivity(new Intent(this, MainActivity.class));
         }
+        finish();
     }
 
     private void openShopWebLink(Uri uri) {
@@ -240,6 +243,7 @@ public class DeepLinkRouterActiv extends BaseActivity {
                 ItemListActiv.open(this, true, uri.getLastPathSegment());
                 break;
         }
+        finish();
     }
 
 }
