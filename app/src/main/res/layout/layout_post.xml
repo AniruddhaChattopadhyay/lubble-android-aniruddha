@@ -178,7 +178,8 @@
             <ImageView
                 android:layout_width="18dp"
                 android:layout_height="wrap_content"
-                app:srcCompat="@drawable/ic_reply_black_24dp"
+                android:layout_marginBottom="-2dp"
+                app:srcCompat="@drawable/ic_baseline_chat_24"
                 app:tint="@color/md_grey_600" />
 
             <TextView
@@ -187,7 +188,8 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:minEms="1"
-                tools:text="3" />
+                android:layout_marginStart="4dp"
+                tools:text="13" />
 
         </LinearLayout>
 
