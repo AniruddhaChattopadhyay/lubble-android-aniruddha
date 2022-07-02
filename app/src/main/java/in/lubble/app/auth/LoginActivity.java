@@ -107,12 +107,12 @@ public class LoginActivity extends BaseActivity {
         try {
             idpConfig = new AuthUI.IdpConfig.PhoneBuilder()
                     .setDefaultCountryIso("IN")
-                    .setWhitelistedCountries(whitelistedCountries)
+                    .setAllowedCountries(whitelistedCountries)
                     .build();
         } catch (IllegalStateException ex) {
             FirebaseCrashlytics.getInstance().recordException(ex);
             idpConfig = new AuthUI.IdpConfig.PhoneBuilder()
-                    .setWhitelistedCountries(whitelistedCountries)
+                    .setAllowedCountries(whitelistedCountries)
                     .build();
         }
         selectedProviders.add(idpConfig);
@@ -144,6 +144,7 @@ public class LoginActivity extends BaseActivity {
                     AuthUI.getInstance()
                             .createSignInIntentBuilder()
                             .setEmailLink(link)
+                            .setTheme(R.style.AppTheme)
                             .setAvailableProviders(selectedProviders)
                             .build(),
                     RC_SIGN_IN);
