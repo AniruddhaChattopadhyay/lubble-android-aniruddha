@@ -50,33 +50,23 @@ public class EventGroupJoinedActivity extends BaseActivity {
     private static final String TAG = "EventGroupJoinedActiv";
     private static final String STATUS = "STATUS";
     private static final String EVENT_ID = "EVENT_ID";
-    private static final String GROUP_ID = "GROUP_ID";
-    private static final String IS_JOINED = "IS_JOINED";
 
     private RelativeLayout rootLayout;
     private ImageView cancelIcon;
     private TextView titleTv;
-    private TextView subtitleTv;
-    private ImageView groupIcon;
-    private TextView groupNameTv;
-    private Button openGroupBtn;
     private TextView finalGuestCountTv;
     private Button confirmGuestsBtn;
     private ElegantNumberButton guestCounter;
-    private LinearLayout ticketShareLayout, groupContainer;
+    private LinearLayout ticketShareLayout;
     private Endpoints endpoints;
     private int status = 1;
     private String eventId;
-    private String groupId;
-    private boolean isJoined;
     private ValueEventListener listener;
 
-    public static void open(Context context, int status, String eventId, @NonNull String groupId, boolean isJoined) {
+    public static void open(Context context, int status, String eventId) {
         final Intent intent = new Intent(context, EventGroupJoinedActivity.class);
         intent.putExtra(STATUS, status);
         intent.putExtra(EVENT_ID, eventId);
-        intent.putExtra(GROUP_ID, groupId);
-        intent.putExtra(IS_JOINED, isJoined);
         context.startActivity(intent);
     }
 
@@ -88,25 +78,17 @@ public class EventGroupJoinedActivity extends BaseActivity {
         rootLayout = findViewById(R.id.root);
         cancelIcon = findViewById(R.id.iv_cancel);
         titleTv = findViewById(R.id.tv_title);
-        subtitleTv = findViewById(R.id.tv_subtitle);
-        groupContainer = findViewById(R.id.layout_open_group);
-        groupIcon = findViewById(R.id.iv_group);
-        openGroupBtn = findViewById(R.id.btn_open_group);
         finalGuestCountTv = findViewById(R.id.tv_final_guest_count);
         guestCounter = findViewById(R.id.guest_counter);
         confirmGuestsBtn = findViewById(R.id.btn_confirm_guests);
-        groupNameTv = findViewById(R.id.tv_group_name);
         ticketShareLayout = findViewById(R.id.ticket_share_layout);
 
         status = getIntent().getIntExtra(STATUS, 1);
         eventId = getIntent().getStringExtra(EVENT_ID);
-        groupId = getIntent().getStringExtra(GROUP_ID);
-        isJoined = getIntent().getBooleanExtra(IS_JOINED, false);
 
         changeLayoutFor(status);
         Analytics.triggerScreenEvent(this, getClass());
 
-        fetchLinkedGroupInfo(groupId);
         endpoints = ServiceGenerator.createService(Endpoints.class);
         //endpoints = retrofit.create(Endpoints.class);
         guestCounter.setOnClickListener((ElegantNumberButton.OnClickListener) view -> {
@@ -154,15 +136,6 @@ public class EventGroupJoinedActivity extends BaseActivity {
             }
         });
 
-        openGroupBtn.setOnClickListener(v -> {
-            Analytics.triggerEvent(AnalyticsEvents.EVENT_JOINED_OPEN_GROUP, EventGroupJoinedActivity.this);
-            final Intent intent = new Intent(EventGroupJoinedActivity.this, ChatActivity.class);
-            intent.putExtra(EXTRA_GROUP_ID, groupId);
-            intent.putExtra(EXTRA_IS_JOINING, false);
-            startActivity(intent);
-            finish();
-        });
-
         ticketShareLayout.setVisibility(View.GONE);
 
         cancelIcon.setOnClickListener(v -> finish());
@@ -170,61 +143,12 @@ public class EventGroupJoinedActivity extends BaseActivity {
 
 
     private void changeLayoutFor(int status) {
-        final String isJoinedStr = isJoined ? getString(R.string.already_member) : getString(R.string.now_member);
         if (status == EventData.GOING) {
             rootLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.dark_green));
             titleTv.setText(R.string.event_going_confirm_title);
-            subtitleTv.setText(String.format(getString(R.string.event_going_confirm_subtitle), isJoinedStr));
         } else if (status == EventData.MAYBE) {
             rootLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.dk_colorAccent));
             titleTv.setText(R.string.event_maybe_confirm_title);
-            subtitleTv.setText(String.format(getString(R.string.event_maybe_confirm_subtitle), isJoinedStr));
-        }
-    }
-
-
-    private void fetchLinkedGroupInfo(String gid) {
-        if (!TextUtils.isEmpty(gid)) {
-            subtitleTv.setVisibility(View.VISIBLE);
-            groupContainer.setVisibility(View.VISIBLE);
-            openGroupBtn.setVisibility(View.VISIBLE);
-
-            listener = RealtimeDbHelper.getLubbleGroupInfoRef(gid).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot != null) {
-                        final GroupInfoData groupInfoData = dataSnapshot.getValue(GroupInfoData.class);
-                        if (groupInfoData != null) {
-
-                            GlideApp.with(EventGroupJoinedActivity.this)
-                                    .load(groupInfoData.getThumbnail())
-                                    .placeholder(R.drawable.ic_circle_group_24dp)
-                                    .error(R.drawable.ic_circle_group_24dp)
-                                    .circleCrop()
-                                    .into(groupIcon);
-
-                            groupNameTv.setText(groupInfoData.getTitle());
-                        }
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        } else {
-            subtitleTv.setVisibility(View.GONE);
-            groupContainer.setVisibility(View.GONE);
-            openGroupBtn.setVisibility(View.GONE);
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (listener != null) {
-            RealtimeDbHelper.getLubbleGroupInfoRef(groupId).removeEventListener(listener);
         }
     }
 }

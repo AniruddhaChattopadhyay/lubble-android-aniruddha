@@ -100,9 +100,7 @@
     <string name="now_member">now</string>
     <string name="already_member">already</string>
     <string name="event_going_confirm_title">See you at the event!</string>
-    <string name="event_going_confirm_subtitle">You are %s a member of the event\'s group. Chat with neighbours who are also going.</string>
     <string name="event_maybe_confirm_title">Hope to see you there!</string>
-    <string name="event_maybe_confirm_subtitle">You are %s a member of the event\'s group. Chat with neighbours who are also interested.</string>
     <string name="event_not_going_confirm_title">Not Going?</string>
     <string name="event_not_going_confirm_subtitle">Are you sure you will not attend the event?</string>
     <string name="event_not_going">Not Going</string>
@@ -262,4 +260,5 @@
     </plurals>
 
     <string name="loc_perm_rationale_events">We need your location to show events nearest to you</string>
+    <string name="facebook_client_token" translatable="false">7722a1a96d6b11a518bc13afab8bcd7b</string>
 </resources>
