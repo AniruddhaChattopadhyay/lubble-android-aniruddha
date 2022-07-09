@@ -130,10 +130,9 @@ public class LoginActivity extends BaseActivity {
                 .build();
 
         Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
-                .setLogo(R.drawable.ic_android_black_24dp)
+                .setTheme(R.style.AppTheme)
                 .setAvailableProviders(selectedProviders)
                 .setAuthMethodPickerLayout(customLayout)
-                .setTheme(R.style.AppTheme)
                 .setTosAndPrivacyPolicyUrls("https://lubble.in/policies/terms", "https://lubble.in/policies/privacy")
                 .setIsSmartLockEnabled(false, false)
                 .build();
@@ -143,8 +142,8 @@ public class LoginActivity extends BaseActivity {
             startActivityForResult(
                     AuthUI.getInstance()
                             .createSignInIntentBuilder()
-                            .setEmailLink(link)
                             .setTheme(R.style.AppTheme)
+                            .setEmailLink(link)
                             .setAvailableProviders(selectedProviders)
                             .build(),
                     RC_SIGN_IN);
