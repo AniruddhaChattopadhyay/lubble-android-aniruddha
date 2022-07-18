@@ -78,6 +78,7 @@ import in.lubble.app.feed_user.FeedPostComparator;
 import in.lubble.app.feed_user.JoinedGroupsStoriesAdapter;
 import in.lubble.app.feed_user.PagingLoadStateAdapter;
 import in.lubble.app.feed_user.ReplyBottomSheetDialogFrag;
+import in.lubble.app.feed_user.ReplyListener;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.models.ProfileData;
@@ -100,6 +101,7 @@ import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 import io.getstream.cloud.CloudFlatFeed;
 import io.getstream.core.models.EnrichedActivity;
+import io.getstream.core.models.Reaction;
 import permissions.dispatcher.NeedsPermission;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -114,7 +116,7 @@ import static in.lubble.app.utils.StringUtils.isValidString;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ProfileFrag extends Fragment implements FeedAdaptor.FeedListener, SwipeRefreshLayout.OnRefreshListener,JoinedGroupsStoriesAdapter.JoinedGroupsListener  {
+public class ProfileFrag extends Fragment implements FeedAdaptor.FeedListener, ReplyListener,SwipeRefreshLayout.OnRefreshListener,JoinedGroupsStoriesAdapter.JoinedGroupsListener  {
     private static final String TAG = "ProfileFrag";
     private static final String ARG_USER_ID = "arg_user_id";
 
@@ -735,4 +737,15 @@ public class ProfileFrag extends Fragment implements FeedAdaptor.FeedListener, S
         }
     }
 
+    @Override
+    public void onReplied(String activityId, String foreignId, Reaction reaction) {
+        postBtnLL.setVisibility(View.VISIBLE);
+        adapter.addUserReply(activityId, reaction);
+        Analytics.triggerFeedEngagement(foreignId, "comment", 10, "timeline:" + userId, FeedFrag.class.getSimpleName());
+    }
+
+    @Override
+    public void onDismissed() {
+        postBtnLL.setVisibility(View.VISIBLE);
+    }
 }
