@@ -1,10 +1,17 @@
 package in.lubble.app.profile;
 
+import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
+import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
+
+import android.Manifest;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,11 +26,15 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.paging.LoadState;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -32,11 +43,10 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
-import com.freshchat.consumer.sdk.Freshchat;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -45,50 +55,68 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.explore.ExploreActiv;
 import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
+import in.lubble.app.feed_user.FeedAdaptor;
+import in.lubble.app.feed_user.FeedCombinedFragment;
+import in.lubble.app.feed_user.FeedFrag;
+import in.lubble.app.feed_user.FeedPostComparator;
+import in.lubble.app.feed_user.JoinedGroupsStoriesAdapter;
+import in.lubble.app.feed_user.PagingLoadStateAdapter;
+import in.lubble.app.feed_user.ReplyBottomSheetDialogFrag;
+import in.lubble.app.feed_user.ReplyListener;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.FeedGroupData;
-import in.lubble.app.models.GroupInfoData;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
-import in.lubble.app.receivers.FlairUpdateListener;
+import in.lubble.app.receivers.ShareSheetReceiver;
 import in.lubble.app.referrals.ReferralActivity;
+import in.lubble.app.services.FeedServices;
+import in.lubble.app.utils.FeedUtils;
+import in.lubble.app.utils.FeedViewModel;
 import in.lubble.app.utils.FragUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
+import in.lubble.app.utils.FullScreenVideoActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 import in.lubble.app.utils.UserUtils;
+import in.lubble.app.utils.VisibleState;
+import in.lubble.app.widget.PostReplySmoothScroller;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
+import io.getstream.cloud.CloudFlatFeed;
+import io.getstream.core.models.EnrichedActivity;
+import io.getstream.core.models.Reaction;
+import permissions.dispatcher.NeedsPermission;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 import static in.lubble.app.analytics.AnalyticsEvents.NEW_DM_CLICKED;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
+import static in.lubble.app.utils.FeedUtils.processTrackedPosts;
 import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
 import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
 import static in.lubble.app.utils.StringUtils.isValidString;
 
-public class ProfileFrag extends Fragment {
+import org.jetbrains.annotations.NotNull;
+
+public class ProfileFrag extends Fragment implements FeedAdaptor.FeedListener, ReplyListener,SwipeRefreshLayout.OnRefreshListener,JoinedGroupsStoriesAdapter.JoinedGroupsListener  {
     private static final String TAG = "ProfileFrag";
     private static final String ARG_USER_ID = "arg_user_id";
 
@@ -110,14 +138,14 @@ public class ProfileFrag extends Fragment {
     private Button inviteBtn;
     private TextView logoutTv;
     private ProgressBar progressBar;
-    private CardView referralCard;
+//    private CardView referralCard;
     private DatabaseReference userRef;
     private DatabaseReference dmRef;
     @Nullable
     private ProfileData profileData;
     private String sharingUrl;
     private ProgressDialog sharingProgressDialog;
-    private GroupsAdapter groupsAdapter;
+//    private GroupsAdapter groupsAdapter;
     private ConstraintLayout statsContainer;
     private ImageView genderIv;
     private TextView genderTv;
@@ -127,6 +155,16 @@ public class ProfileFrag extends Fragment {
     private TextView educationTv;
     private int profileView;
     private UserProfileData userProfileData;
+    private RecyclerView feedRV;
+    private FeedAdaptor adapter;
+    private FeedViewModel viewModel;
+    private LinearLayoutManager layoutManager;
+    private LinearLayout postBtnLL;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private RecyclerView joinedGroupStoriesRV;
+    private LinearLayout joinedGroupStroriesLL;
+    private ArrayList<FeedGroupData> feedGroupDataList;
+
 
     public ProfileFrag() {
         //Required empty public constructor
@@ -147,6 +185,7 @@ public class ProfileFrag extends Fragment {
         if (getArguments() != null && !TextUtils.isEmpty(getArguments().getString(ARG_USER_ID))) {
             userId = getArguments().getString(ARG_USER_ID);
         }
+        viewModel = new ViewModelProvider(this).get(FeedViewModel.class);
     }
 
     @Override
@@ -154,7 +193,7 @@ public class ProfileFrag extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_profile, container, false);
-
+        postBtnLL = rootView.findViewById(R.id.post_btn_LL);
         profilePicIv = rootView.findViewById(R.id.iv_profilePic);
         userName = rootView.findViewById(R.id.tv_name);
         badgeTv = rootView.findViewById(R.id.tv_badge);
@@ -171,16 +210,18 @@ public class ProfileFrag extends Fragment {
         businessTv = rootView.findViewById(R.id.tv_business);
         educationIv = rootView.findViewById(R.id.iv_education);
         educationTv = rootView.findViewById(R.id.tv_education);
-        userGroupsRv = rootView.findViewById(R.id.rv_user_groups);
-        referralCard = rootView.findViewById(R.id.card_referral);
-        inviteBtn = rootView.findViewById(R.id.btn_invite);
         coinsContainer = rootView.findViewById(R.id.container_current_coins);
         coinsTv = rootView.findViewById(R.id.tv_total_coins);
         statsContainer = rootView.findViewById(R.id.container_stats);
-        logoutTv = rootView.findViewById(R.id.tv_logout);
         progressBar = rootView.findViewById(R.id.progressBar_profile);
-        TextView versionTv = rootView.findViewById(R.id.tv_version_name);
-        RelativeLayout feedbackView = rootView.findViewById(R.id.feedback_container);
+        layoutManager = new LinearLayoutManager(getContext());
+        feedRV = rootView.findViewById(R.id.feed_recyclerview);
+        feedRV.setLayoutManager(layoutManager);
+        swipeRefreshLayout = rootView.findViewById(R.id.swipe_refresh_feed);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(requireContext(), R.color.colorAccent));
+        joinedGroupStoriesRV = rootView.findViewById(R.id.joined_groups_stories_recycler_view);
+        joinedGroupStroriesLL = rootView.findViewById(R.id.ll_joined_groups_stories);
 
         Bundle bundle = new Bundle();
         bundle.putString("profile_uid", userId);
@@ -221,6 +262,8 @@ public class ProfileFrag extends Fragment {
         });
 
         if (userId.equals(FirebaseAuth.getInstance().getUid())) {
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) joinedGroupStroriesLL.getLayoutParams();
+            params.addRule(RelativeLayout.BELOW, R.id.bottom_separator_profile);
             statusBtn.setVisibility(View.VISIBLE);
 
             statusBtn.setOnClickListener(new View.OnClickListener() {
@@ -235,35 +278,7 @@ public class ProfileFrag extends Fragment {
             });
         }
 
-        inviteBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onInviteClicked();
-            }
-        });
-
-        logoutTv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Analytics.triggerLogoutEvent(getContext());
-                UserUtils.logout(getActivity());
-            }
-        });
-
-        versionTv.setVisibility(FirebaseAuth.getInstance().getUid().equalsIgnoreCase(userId) ? View.VISIBLE : View.GONE);
-        feedbackView.setVisibility(FirebaseAuth.getInstance().getUid().equalsIgnoreCase(userId) ? View.VISIBLE : View.GONE);
-
-        versionTv.setText(BuildConfig.VERSION_NAME);
-        feedbackView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Freshchat.showConversations(requireContext());
-            }
-        });
-
-        groupsAdapter = new GroupsAdapter(GlideApp.with(requireContext()));
-        userGroupsRv.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false));
-        userGroupsRv.setAdapter(groupsAdapter);
+//        groupsAdapter = new GroupsAdapter(GlideApp.with(requireContext()));
         fetchStats();
 
         coinsContainer.setOnClickListener(new View.OnClickListener() {
@@ -273,8 +288,98 @@ public class ProfileFrag extends Fragment {
             }
         });
 
+        initFeedRecyclerView(true);
+        initJoinedGroupRecyclerView();
         return rootView;
     }
+
+    RecyclerView.OnScrollListener scrollListener = new RecyclerView.OnScrollListener() {
+        int state = SCROLL_STATE_IDLE;
+
+        @Override
+        public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+            state = newState;
+        }
+
+        @Override
+        public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+            int firstCompletelyVisibleItemPosition = layoutManager.findFirstCompletelyVisibleItemPosition();
+            int lastCompletelyVisibleItemPosition = layoutManager.findLastCompletelyVisibleItemPosition();
+            VisibleState visibleState;
+            if (firstCompletelyVisibleItemPosition == NO_POSITION && lastCompletelyVisibleItemPosition == NO_POSITION) {
+                // no post is completely visible: either 2 posts are partially visible or just 1 long post
+                // in both cases count the impression of both or the one single post
+                visibleState = new VisibleState(layoutManager.findFirstVisibleItemPosition(),
+                        layoutManager.findLastVisibleItemPosition());
+            } else {
+                visibleState = new VisibleState(firstCompletelyVisibleItemPosition,
+                        lastCompletelyVisibleItemPosition);
+            }
+            viewModel.onScrolled(visibleState);
+        }
+    };
+
+    private void initJoinedGroupRecyclerView() {
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.fetchUserProfile(userId).enqueue(new Callback<UserProfileData>() {
+            @Override
+            public void onResponse(Call<UserProfileData> call, Response<UserProfileData> response) {
+                userProfileData = response.body();
+                if (response.isSuccessful() && userProfileData != null && isAdded()) {
+                    LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+                    joinedGroupStroriesLL.setVisibility(View.VISIBLE);
+                    joinedGroupStoriesRV.setLayoutManager(layoutManager);
+                    feedGroupDataList = (ArrayList<FeedGroupData>) userProfileData.getJoinedGroups();
+                    JoinedGroupsStoriesAdapter adapter = new JoinedGroupsStoriesAdapter(getContext(), feedGroupDataList, ProfileFrag.this);
+                    joinedGroupStoriesRV.setAdapter(adapter);
+
+                } else if (isAdded() && isVisible()) {
+                    FirebaseCrashlytics.getInstance().log("referral leaderboard bad response");
+                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserProfileData> call, Throwable t) {
+                if (isAdded() && isVisible()) {
+                    Log.e(TAG, "onFailure: ");
+                    Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+    private void initFeedRecyclerView(boolean isRefresh) {
+        CloudFlatFeed timelineFeed = FeedServices.getTimelineClient().flatFeed("user", userId);
+        if (adapter == null) {
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            int width = displayMetrics.widthPixels;
+            int height = displayMetrics.heightPixels; //height of RV, excluding toolbar & bottom nav
+            adapter = new FeedAdaptor(new FeedPostComparator());
+            adapter.setVars(getContext(), width, height, GlideApp.with(this), this);
+
+            viewModel.getDistinctLiveData().observe(getViewLifecycleOwner(), visibleState -> {
+                processTrackedPosts(adapter.snapshot().getItems(), visibleState, "timeline:" + FirebaseAuth.getInstance().getUid(), FeedFrag.class.getSimpleName());
+            });
+        }
+        adapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
+        feedRV.setAdapter(adapter.withLoadStateAdapters(
+                new PagingLoadStateAdapter(() -> {
+                    adapter.retry();
+                    return null;
+                })
+        ));
+        feedRV.clearOnScrollListeners();
+        feedRV.addOnScrollListener(scrollListener);
+        String algo = isRefresh ? null : "lbl_" + LubbleSharedPrefs.getInstance().getLubbleId();
+        viewModel.loadPaginatedActivities(timelineFeed, 10, algo).observe(getViewLifecycleOwner(), pagingData -> {
+            adapter.submitData(getViewLifecycleOwner().getLifecycle(), pagingData);
+        });
+        //layoutManager.scrollToPosition(0);
+    }
+
 
     @Override
     public void onStart() {
@@ -326,66 +431,115 @@ public class ProfileFrag extends Fragment {
         }
     };
 
-    private class GroupsAdapter extends RecyclerView.Adapter<GroupsAdapter.ViewHolder> {
+    @Override
+    public void onRefresh() {
+        initFeedRecyclerView(true);
+        initJoinedGroupRecyclerView();
+        Analytics.triggerEvent(AnalyticsEvents.FEED_REFRESHED, requireContext());
+    }
 
-        private final List<FeedGroupData> groupList = new ArrayList<>();
-        private final GlideRequests glideApp;
 
-        GroupsAdapter(GlideRequests glideApp) {
-            this.glideApp = glideApp;
-        }
+    @Override
+    public void onReplyClicked(String activityId, String foreignId, String postActorUid, int position) {
+        postBtnLL.setVisibility(View.GONE);
+        ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId, foreignId, postActorUid);
+        replyBottomSheetDialogFrag.show(getChildFragmentManager(), null);
+        RecyclerView.SmoothScroller smoothScroller = new PostReplySmoothScroller(feedRV.getContext());
+        smoothScroller.setTargetPosition(position);
+        feedRV.getLayoutManager().startSmoothScroll(smoothScroller);
+    }
 
-        @Override
-        public GroupsAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new GroupsAdapter.ViewHolder(LayoutInflater.from(parent.getContext()), parent);
-        }
+    @Override
+    public void onImageClicked(String imgPath, ImageView imageView) {
+        FullScreenImageActivity.open(getActivity(), requireContext(), imgPath, imageView, null, R.drawable.ic_cancel_black_24dp);
+    }
 
-        @Override
-        public void onBindViewHolder(GroupsAdapter.ViewHolder holder, int position) {
-            final FeedGroupData groupData = groupList.get(position);
-            RequestOptions requestOptions = new RequestOptions();
-            requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCornersTransformation(UiUtils.dpToPx(8), 0));
-            glideApp.load(groupData.getPhotoUrl())
-                    .placeholder(R.drawable.rounded_rect_gray)
-                    .error(R.drawable.rounded_rect_gray)
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .apply(requestOptions)
-                    .into(holder.groupDpIv);
-            holder.groupNameTv.setText(groupData.getName());
-            holder.itemView.setOnClickListener(v->{
-                GroupFeedActivity.open(requireContext(), groupData);
-            });
-        }
+    @Override
+    public void onVideoClicked(String vidPath) {
+        FullScreenVideoActivity.open(getActivity(), requireContext(), vidPath, "", "");
+    }
 
-        @Override
-        public int getItemCount() {
-            return groupList.size();
-        }
+    @Override
+    public void onLiked(String foreignID) {
+        Analytics.triggerFeedEngagement(foreignID, "like", 5, "timeline:" + userId, FeedFrag.class.getSimpleName());
+    }
 
-        void addGroupList(List<FeedGroupData> groupDataList) {
-            groupList.addAll(groupDataList);
-            notifyDataSetChanged();
-        }
-
-        public void clear() {
-            groupList.clear();
-            notifyDataSetChanged();
-        }
-
-        class ViewHolder extends RecyclerView.ViewHolder {
-
-            final ImageView groupDpIv;
-            final TextView groupNameTv;
-            final TextView groupMemberTv;
-
-            ViewHolder(LayoutInflater inflater, ViewGroup parent) {
-                super(inflater.inflate(R.layout.item_user_group, parent, false));
-                groupDpIv = itemView.findViewById(R.id.iv_wheretonight_pic);
-                groupNameTv = itemView.findViewById(R.id.tv_group_title);
-                groupMemberTv = itemView.findViewById(R.id.tv_member_hint);
+    @Override
+    public void onRefreshLoading(@NotNull LoadState refresh) {
+        if (refresh == LoadState.Loading.INSTANCE) {
+            if (!swipeRefreshLayout.isRefreshing()) {
+                //show loader only on first load, not when user pulled to refresh
+                swipeRefreshLayout.setRefreshing(true);
             }
+        } else {
+            swipeRefreshLayout.setRefreshing(false);
         }
     }
+
+    @Override
+    public void openPostActivity(@NotNull String activityId) {
+
+    }
+
+    @Override
+    public void openGroupFeed(@NotNull FeedGroupData feedGroupData) {
+
+    }
+
+    @Override
+    public void showEmptyView(boolean show) {
+
+    }
+
+    @Override
+    public void onShareClicked(EnrichedActivity activity, Map<String, Object> extras) {
+        startSharingPostProfile(activity, extras);
+    }
+
+    @Override
+    public void onBadgeClicked(String name) {
+        Analytics.triggerEvent(AnalyticsEvents.CLICK_ON_OTHERS_STATUS, requireContext());
+        View dialogView = requireActivity().getLayoutInflater().inflate(R.layout.bottom_sheet_for_status_redirect, null);
+        final BottomSheetDialog dialog = new BottomSheetDialog(requireContext(), R.style.RoundedBottomSheetDialog);
+        TextView tv = dialogView.findViewById(R.id.status_redirect_tv);
+        tv.setText("You are viewing " + name + "'s badge. Set your badge from your profile or here \uD83D\uDC47");
+        Button btn = dialogView.findViewById(R.id.status_redirect_btn);
+        btn.setOnClickListener(v -> {
+            Analytics.triggerEvent(AnalyticsEvents.CLICK_ON_SET_STATUS_FROM_OTHERS_STATUS, requireContext());
+            StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment(getView());
+            statusBottomSheetFragment.show(((AppCompatActivity) requireContext()).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
+            dialog.dismiss();
+        });
+        dialog.setContentView(dialogView);
+        dialog.show();
+    }
+
+    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    public void startSharingPostProfile(EnrichedActivity activity, Map<String, Object> extras) {
+        FeedUtils.requestPostShareIntent(GlideApp.with(this), activity, extras, this::startShareFlow);
+    }
+
+    private void startShareFlow(Intent sharingIntent) {
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                requireContext(), 21,
+                new Intent(requireContext(), ShareSheetReceiver.class),
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            requireContext().startActivity(Intent.createChooser(sharingIntent, requireContext().getString(R.string.refer_share_title), pendingIntent.getIntentSender()));
+        } else {
+            requireContext().startActivity(Intent.createChooser(sharingIntent, requireContext().getString(R.string.refer_share_title)));
+        }
+        Bundle bundle = new Bundle();
+        bundle.putString("feed_id", sharingIntent.getStringExtra("FEED_POST_ID"));
+        Analytics.triggerEvent(AnalyticsEvents.POST_SHARED, bundle, requireContext());
+    }
+
+    @Override
+    public void onExploreClicked() {
+        ExploreActiv.open(getContext(), false);
+    }
+
 
     private void fetchProfileFeed() {
         progressBar.setVisibility(View.VISIBLE);
@@ -429,12 +583,8 @@ public class ProfileFrag extends Fragment {
                     syncDms();
                     if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
                         editProfileTV.setVisibility(View.VISIBLE);
-                        referralCard.setVisibility(View.VISIBLE);
-                        logoutTv.setVisibility(View.VISIBLE);
                     } else {
                         editProfileTV.setVisibility(View.GONE);
-                        referralCard.setVisibility(View.GONE);
-                        logoutTv.setVisibility(View.GONE);
                     }
                     likesTv.setText(String.valueOf(profileData.getLikes()));
                     coinsTv.setText(String.valueOf(profileData.getCoins()));
@@ -560,7 +710,7 @@ public class ProfileFrag extends Fragment {
             public void onResponse(Call<UserProfileData> call, Response<UserProfileData> response) {
                 userProfileData = response.body();
                 if (response.isSuccessful() && userProfileData != null && isAdded()) {
-                    groupsAdapter.addGroupList(userProfileData.getJoinedGroups());
+//                    groupsAdapter.addGroupList(userProfileData.getJoinedGroups());
                     invitedTv.setText(String.valueOf(userProfileData.getReferrals()));
                 } else if (isAdded() && isVisible()) {
                     FirebaseCrashlytics.getInstance().log("referral leaderboard bad response");
@@ -578,13 +728,6 @@ public class ProfileFrag extends Fragment {
         });
     }
 
-    private void onInviteClicked() {
-        final Intent referralIntent = getReferralIntent(getContext(), sharingUrl, sharingProgressDialog, linkCreateListener);
-        if (referralIntent != null) {
-            startActivity(Intent.createChooser(referralIntent, getString(R.string.refer_share_title)));
-            Analytics.triggerEvent(AnalyticsEvents.REFERRAL_PROFILE_SHARE, getContext());
-        }
-    }
 
     @Override
     public void onStop() {
@@ -594,4 +737,15 @@ public class ProfileFrag extends Fragment {
         }
     }
 
+    @Override
+    public void onReplied(String activityId, String foreignId, Reaction reaction) {
+        postBtnLL.setVisibility(View.VISIBLE);
+        adapter.addUserReply(activityId, reaction);
+        Analytics.triggerFeedEngagement(foreignId, "comment", 10, "timeline:" + userId, FeedFrag.class.getSimpleName());
+    }
+
+    @Override
+    public void onDismissed() {
+        postBtnLL.setVisibility(View.VISIBLE);
+    }
 }
