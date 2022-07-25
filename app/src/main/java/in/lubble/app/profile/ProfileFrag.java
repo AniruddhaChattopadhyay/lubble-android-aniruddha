@@ -1,5 +1,6 @@
 package in.lubble.app.profile;
 
+import static android.app.Activity.RESULT_OK;
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
 
@@ -71,6 +72,7 @@ import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.explore.ExploreActiv;
 import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
+import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.feed_user.FeedAdaptor;
 import in.lubble.app.feed_user.FeedCombinedFragment;
 import in.lubble.app.feed_user.FeedFrag;
@@ -108,6 +110,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static in.lubble.app.analytics.AnalyticsEvents.NEW_DM_CLICKED;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserFeedIntroRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
 import static in.lubble.app.utils.FeedUtils.processTrackedPosts;
 import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
@@ -119,6 +122,7 @@ import org.jetbrains.annotations.NotNull;
 public class ProfileFrag extends Fragment implements FeedAdaptor.FeedListener, ReplyListener,SwipeRefreshLayout.OnRefreshListener,JoinedGroupsStoriesAdapter.JoinedGroupsListener  {
     private static final String TAG = "ProfileFrag";
     private static final String ARG_USER_ID = "arg_user_id";
+    private static final int REQ_CODE_POST_ACTIV = 226;
 
     private View rootView;
     private String userId;
@@ -478,12 +482,12 @@ public class ProfileFrag extends Fragment implements FeedAdaptor.FeedListener, R
 
     @Override
     public void openPostActivity(@NotNull String activityId) {
-
+        startActivityForResult(FeedPostActivity.getIntent(requireContext(), activityId), REQ_CODE_POST_ACTIV);
     }
 
     @Override
     public void openGroupFeed(@NotNull FeedGroupData feedGroupData) {
-
+        GroupFeedActivity.open(requireContext(), feedGroupData.getFeedName());
     }
 
     @Override
@@ -701,8 +705,28 @@ public class ProfileFrag extends Fragment implements FeedAdaptor.FeedListener, R
             educationIv.setVisibility(View.GONE);
             educationTv.setVisibility(View.GONE);
         }
-    }
 
+        setJoinedGroupsLayoutPosition();
+    }
+    private void setJoinedGroupsLayoutPosition() {
+        if(educationTv.getVisibility() == View.VISIBLE){
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) joinedGroupStroriesLL.getLayoutParams();
+            params.addRule(RelativeLayout.BELOW, R.id.tv_education);
+        }
+        else if(educationTv.getVisibility() == View.GONE && businessTv.getVisibility() == View.VISIBLE) {
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) joinedGroupStroriesLL.getLayoutParams();
+            params.addRule(RelativeLayout.BELOW, R.id.tv_business);
+        }
+        else if(educationTv.getVisibility() == View.GONE && genderTv.getVisibility() == View.VISIBLE){
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) joinedGroupStroriesLL.getLayoutParams();
+            params.addRule(RelativeLayout.BELOW, R.id.tv_gender);
+        }
+        else{
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) joinedGroupStroriesLL.getLayoutParams();
+            params.addRule(RelativeLayout.BELOW, R.id.bottom_separator_profile);
+        }
+
+    }
     private void fetchStats() {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         endpoints.fetchUserProfile(userId).enqueue(new Callback<UserProfileData>() {
@@ -747,5 +771,14 @@ public class ProfileFrag extends Fragment implements FeedAdaptor.FeedListener, R
     @Override
     public void onDismissed() {
         postBtnLL.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_CODE_POST_ACTIV && resultCode == RESULT_OK) {
+            //Returned from individual post -> refresh list to update reactions
+            initFeedRecyclerView(false);
+        }
     }
 }
