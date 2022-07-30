@@ -266,8 +266,6 @@ public class ProfileFrag extends Fragment implements FeedAdaptor.FeedListener, R
         });
 
         if (userId.equals(FirebaseAuth.getInstance().getUid())) {
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) joinedGroupStroriesLL.getLayoutParams();
-            params.addRule(RelativeLayout.BELOW, R.id.bottom_separator_profile);
             statusBtn.setVisibility(View.VISIBLE);
 
             statusBtn.setOnClickListener(new View.OnClickListener() {
@@ -706,27 +704,8 @@ public class ProfileFrag extends Fragment implements FeedAdaptor.FeedListener, R
             educationTv.setVisibility(View.GONE);
         }
 
-        setJoinedGroupsLayoutPosition();
     }
-    private void setJoinedGroupsLayoutPosition() {
-        if(educationTv.getVisibility() == View.VISIBLE){
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) joinedGroupStroriesLL.getLayoutParams();
-            params.addRule(RelativeLayout.BELOW, R.id.tv_education);
-        }
-        else if(educationTv.getVisibility() == View.GONE && businessTv.getVisibility() == View.VISIBLE) {
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) joinedGroupStroriesLL.getLayoutParams();
-            params.addRule(RelativeLayout.BELOW, R.id.tv_business);
-        }
-        else if(educationTv.getVisibility() == View.GONE && genderTv.getVisibility() == View.VISIBLE){
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) joinedGroupStroriesLL.getLayoutParams();
-            params.addRule(RelativeLayout.BELOW, R.id.tv_gender);
-        }
-        else{
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) joinedGroupStroriesLL.getLayoutParams();
-            params.addRule(RelativeLayout.BELOW, R.id.bottom_separator_profile);
-        }
 
-    }
     private void fetchStats() {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         endpoints.fetchUserProfile(userId).enqueue(new Callback<UserProfileData>() {
