@@ -107,12 +107,12 @@ public class LoginActivity extends BaseActivity {
         try {
             idpConfig = new AuthUI.IdpConfig.PhoneBuilder()
                     .setDefaultCountryIso("IN")
-                    .setWhitelistedCountries(whitelistedCountries)
+                    .setAllowedCountries(whitelistedCountries)
                     .build();
         } catch (IllegalStateException ex) {
             FirebaseCrashlytics.getInstance().recordException(ex);
             idpConfig = new AuthUI.IdpConfig.PhoneBuilder()
-                    .setWhitelistedCountries(whitelistedCountries)
+                    .setAllowedCountries(whitelistedCountries)
                     .build();
         }
         selectedProviders.add(idpConfig);
@@ -130,10 +130,9 @@ public class LoginActivity extends BaseActivity {
                 .build();
 
         Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
-                .setLogo(R.drawable.ic_android_black_24dp)
+                .setTheme(R.style.AppTheme)
                 .setAvailableProviders(selectedProviders)
                 .setAuthMethodPickerLayout(customLayout)
-                .setTheme(R.style.AppTheme)
                 .setTosAndPrivacyPolicyUrls("https://lubble.in/policies/terms", "https://lubble.in/policies/privacy")
                 .setIsSmartLockEnabled(false, false)
                 .build();
@@ -143,6 +142,7 @@ public class LoginActivity extends BaseActivity {
             startActivityForResult(
                     AuthUI.getInstance()
                             .createSignInIntentBuilder()
+                            .setTheme(R.style.AppTheme)
                             .setEmailLink(link)
                             .setAvailableProviders(selectedProviders)
                             .build(),

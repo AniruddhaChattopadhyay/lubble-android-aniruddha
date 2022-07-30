@@ -1,10 +1,7 @@
 package in.lubble.app.events;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
-import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
-import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
@@ -30,7 +27,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,13 +62,10 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
-import in.lubble.app.chat.ChatActivity;
-import in.lubble.app.chat.ShareActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
 import in.lubble.app.models.EventMemberData;
 import in.lubble.app.models.ProfileInfo;
-import in.lubble.app.models.UserGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.receivers.ShareSheetReceiver;
@@ -99,7 +92,7 @@ public class EventInfoActivity extends BaseActivity {
     private ValueEventListener eventInfoListener;
     private ProgressBar progressBar;
     private EventData eventData;
-    private ImageView groupHeaderIv, groupIcon;
+    private ImageView groupHeaderIv;
     private TextView monthTv;
     private TextView dateTv;
     private TextView organizerTv;
@@ -114,23 +107,13 @@ public class EventInfoActivity extends BaseActivity {
     private TextView statsTv, shareTv;
     private TextView timeTv;
     private TextView addressTv;
-    private TextView linkedGroupTv;
-    private ImageView linkedGroupOpenIcon;
     private LinearLayout mapContainer;
     private ImageView ticketIv;
     private TextView ticketCountTv;
     private LinearLayout luckyDrawHint;
-    private RelativeLayout groupContainer;
     private EmojiTextView descTv;
     private WebView descWebView;
     private ProgressDialog progressDialog;
-    private boolean isLinkedGroupJoined;
-    private DatabaseReference checkGroupJoinedRef;
-    private ValueEventListener checkGroupJoinedListener;
-    private DatabaseReference isGroupJoinedRef;
-    private ValueEventListener isGroupJoinedListener;
-    private DatabaseReference groupTitleRef;
-    private ValueEventListener groupTitleListener;
     private long oldResponse = EventData.NO;
     private Button ticketsBtn;
     private EventMemberData current_member = null;
@@ -154,7 +137,6 @@ public class EventInfoActivity extends BaseActivity {
         setTitle("");
         progressBar = findViewById(R.id.progressBar_groupInfo);
         groupHeaderIv = findViewById(R.id.iv_group_image);
-        groupIcon = findViewById(R.id.iv_group);
 
         monthTv = findViewById(R.id.tv_month);
         dateTv = findViewById(R.id.tv_date);
@@ -168,8 +150,6 @@ public class EventInfoActivity extends BaseActivity {
         statsTv = findViewById(R.id.tv_stats);
         timeTv = findViewById(R.id.tv_phone);
         addressTv = findViewById(R.id.tv_address);
-        linkedGroupTv = findViewById(R.id.tv_linked_group);
-        linkedGroupOpenIcon = findViewById(R.id.iv_open_group);
         mapContainer = findViewById(R.id.map_container);
         ticketIv = findViewById(R.id.iv_ticket);
         ticketCountTv = findViewById(R.id.tv_ticket_count);
@@ -179,7 +159,6 @@ public class EventInfoActivity extends BaseActivity {
         goingPersonOne = findViewById(R.id.iv_stats_one);
         goingPersonTwo = findViewById(R.id.iv_stats_two);
         goingPersonThree = findViewById(R.id.iv_stats_three);
-        groupContainer = findViewById(R.id.group_container);
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(R.string.joining_group);
@@ -212,15 +191,6 @@ public class EventInfoActivity extends BaseActivity {
             if (eventData != null && !checkEventAdmin()) {
                 final int newResponse = oldResponse == EventData.MAYBE ? EventData.NO : EventData.MAYBE;
                 changeStatus(newResponse);
-            }
-        });
-
-        linkedGroupOpenIcon.setOnClickListener(v -> {
-            if (eventData != null) {
-                final Intent intent = new Intent(EventInfoActivity.this, ChatActivity.class);
-                intent.putExtra(EXTRA_GROUP_ID, eventData.getGid());
-                intent.putExtra(EXTRA_IS_JOINING, false);
-                startActivity(intent);
             }
         });
 
@@ -426,7 +396,7 @@ public class EventInfoActivity extends BaseActivity {
                         toggleGoingButton(newResponse == EventData.GOING);
                         toggleMaybeButton(newResponse == EventData.MAYBE);
                         if (newResponse != EventData.NO) {
-                            EventGroupJoinedActivity.open(EventInfoActivity.this, newResponse, eventId, eventData.getGid(), isLinkedGroupJoined);
+                            EventGroupJoinedActivity.open(EventInfoActivity.this, newResponse, eventId);
                         }
                         oldResponse = newResponse;
                     } else if (!isFinishing()) {
@@ -448,29 +418,6 @@ public class EventInfoActivity extends BaseActivity {
             FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
         }
-
-        //checkGroupJoined(eventData.getGid(), newResponse);
-    }
-
-    private void checkGroupJoined(@NonNull final String groupId, final int status) {
-        checkGroupJoinedRef = getUserGroupsRef().child(groupId);
-        checkGroupJoinedListener = checkGroupJoinedRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                progressDialog.dismiss();
-                toggleGoingButton(status == EventData.GOING);
-                toggleMaybeButton(status == EventData.MAYBE);
-                if (status != EventData.NO) {
-                    EventGroupJoinedActivity.open(EventInfoActivity.this, status, eventId, groupId, isLinkedGroupJoined);
-                }
-                oldResponse = status;
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     private void toggleGoingButton(boolean isGoing) {
@@ -647,8 +594,6 @@ public class EventInfoActivity extends BaseActivity {
                             dateTv.setText(date);
                             timeTv.setText(String.format(getString(R.string.event_time_text), dayOfWeek, date, monthFull, startTime, endTime));
 
-                            fetchLinkedGroupInfo(eventData.getGid());
-
                             int goingCount = 0;
                             int maybeCount = 0;
                             for (EventMemberData eventMemberData : eventData.getMembers()) {
@@ -675,7 +620,6 @@ public class EventInfoActivity extends BaseActivity {
                                 suffixText += String.format(getString(R.string.event_maybe_suffix), maybeCount);
                                 statsTv.setText(String.format(getString(R.string.event_maybe_count), prefixText, suffixText));
                             }
-                            fetchIsLinkedGroupJoined(eventData.getGid());
                             fetchMemberInfo(eventData);
                         }
                     }
@@ -765,51 +709,6 @@ public class EventInfoActivity extends BaseActivity {
         }
     }
 
-    private void fetchIsLinkedGroupJoined(@NonNull String linkedGroupId) {
-        isGroupJoinedRef = getUserGroupsRef().child(linkedGroupId);
-        isGroupJoinedListener = isGroupJoinedRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
-                if (userGroupData != null) {
-                    isLinkedGroupJoined = userGroupData.isJoined();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void fetchLinkedGroupInfo(String gid) {
-        if (!TextUtils.isEmpty(gid)) {
-            groupContainer.setVisibility(View.VISIBLE);
-            groupIcon.setVisibility(View.VISIBLE);
-            groupTitleRef = RealtimeDbHelper.getLubbleGroupInfoRef(gid).child("title");
-            groupTitleListener = groupTitleRef.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot != null) {
-                        final String title = dataSnapshot.getValue(String.class);
-                        if (StringUtils.isValidString(title)) {
-                            linkedGroupTv.setText(String.format(getString(R.string.event_linked_group_hint), title));
-                        }
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        } else {
-            groupContainer.setVisibility(View.GONE);
-            groupIcon.setVisibility(View.GONE);
-        }
-    }
-
     private void setTitleWhenCollapsed() {
         final CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.toolbar_layout);
         AppBarLayout appBarLayout = findViewById(R.id.app_bar);
@@ -849,15 +748,6 @@ public class EventInfoActivity extends BaseActivity {
         super.onPause();
         if (eventInfoListener != null) {
             eventRef.removeEventListener(eventInfoListener);
-        }
-        if (checkGroupJoinedRef != null && checkGroupJoinedListener != null) {
-            checkGroupJoinedRef.removeEventListener(checkGroupJoinedListener);
-        }
-        if (isGroupJoinedRef != null && isGroupJoinedListener != null) {
-            isGroupJoinedRef.removeEventListener(isGroupJoinedListener);
-        }
-        if (groupTitleRef != null && groupTitleListener != null) {
-            groupTitleRef.removeEventListener(groupTitleListener);
         }
     }
 

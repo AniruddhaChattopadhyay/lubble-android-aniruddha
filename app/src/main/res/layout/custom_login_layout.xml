@@ -59,7 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="Local News"
+            android:text="Local News &amp; Events"
             android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold"
@@ -131,20 +131,26 @@
         android:text="We never post on Facebook"
         android:textColor="@color/trans_white" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_sign_in_fb"
-        android:layout_width="wrap_content"
+        style="@style/Widget.MaterialComponents.Button.Icon"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/btn_sign_in_google"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="8dp"
-        android:paddingLeft="32dp"
         android:paddingTop="12dp"
+        android:layout_marginStart="80dp"
         android:paddingRight="32dp"
         android:paddingBottom="12dp"
         android:text="Continue with Facebook"
-        android:textSize="16sp"
-        android:theme="@style/FbLoginButton" />
+        android:textAllCaps="false"
+        android:theme="@style/MaterialButton"
+        app:backgroundTint="@color/fb_color"
+        app:cornerRadius="4dp"
+        app:icon="@drawable/com_facebook_button_icon"
+        app:iconGravity="start"
+        app:iconPadding="8dp" />
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/btn_sign_in_google"
@@ -153,6 +159,8 @@
         android:layout_above="@id/tv_sign_in_email"
         android:layout_alignLeft="@id/btn_sign_in_fb"
         android:layout_alignRight="@id/btn_sign_in_fb"
+        android:layout_marginStart="-4dp"
+        android:layout_marginEnd="-4dp"
         android:layout_marginBottom="8dp"
         app:buttonSize="wide" />
 

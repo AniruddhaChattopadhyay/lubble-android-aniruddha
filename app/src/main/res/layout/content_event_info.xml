@@ -312,55 +312,12 @@
 
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/iv_group"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_alignTop="@id/group_container"
-            android:layout_alignBottom="@id/group_container"
-            app:srcCompat="@drawable/ic_group_black_24dp" />
-
-        <RelativeLayout
-            android:id="@+id/group_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/tv_address"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_toRightOf="@id/iv_group"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/tv_linked_group"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginTop="8dp"
-                android:layout_weight="4"
-                android:textColor="@color/black"
-                tools:text="Group Name" />
-
-            <ImageView
-                android:id="@+id/iv_open_group"
-                android:layout_width="wrap_content"
-                android:layout_height="20dp"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:layout_weight="1"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
-                android:textColor="@color/colorAccent"
-                app:srcCompat="@drawable/ic_open_in_new_black_24dp"
-                app:tint="@color/dark_gray" />
-
-        </RelativeLayout>
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/ticketUrl"
             style="@style/Widget.MaterialComponents.Button.Icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/group_container"
+            android:layout_below="@id/map_container"
             android:layout_marginTop="8dp"
             android:text="Get Tickets"
             android:theme="@style/MaterialButton"
